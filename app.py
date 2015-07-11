@@ -1,7 +1,8 @@
 import os
 
-from pyramid.httpexceptions import HTTPFound
+from pyramid.config import Configurator
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
 
 from pyramid.security import remember, forget
 from cryptacular.bcrypt import BCRYPTPasswordManager
@@ -11,6 +12,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
 
+from waitress import serve
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
@@ -67,16 +71,12 @@ def new_account_page(request):
     error = ""
     if request.method == "POST":
         try:
-            make_new_account(request)
+            username = request.params.get('username', None)
+            passsword = request.params.get('password', None)
+            User.new(username, passsword)
         except Exception as e:
             error = e
     return {'error': error}
-
-
-def make_new_account(request):
-    username = request.params.get('username', None)
-    passsword = request.params.get('password', None)
-    User.new(username, passsword)
 
 
 def login(request):
@@ -101,3 +101,30 @@ def home(request):
 def do_logout(request):
     headers = forget(request)
     return HTTPFound(request.route_url("login_page"), headers=headers)
+
+
+def app():
+    debug = os.environ.get('DEBUG', True)
+    settings = {}
+    settings['reload_all'] = debug
+    settings['debug_all'] = debug
+    if not os.environ.get('TESTING', False):
+        engine = sa.create_engine(DATABASE_URL)
+        DBSession.configure(bind=engine)
+    config = Configurator(settings=settings)
+    config.include('pyramid_tm')
+    config.include('pyramid_jinja2')
+    config.add_static_view('static', os.path.join(HERE, 'static'))
+    config.add_route('home', '/')
+    config.add_route('new_account', '/new_account')
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
+    config.scan()
+    app = config.make_wsgi_app()
+    return app
+
+
+if __name__ == '__main__':
+    app = app()
+    port = os.environ.get('PORT', 5000)
+    serve(app, host='0.0.0.0', port=port)
