@@ -27,6 +27,17 @@ class User(Base):
     password = sa.Column(sa.Unicode(127), nullable=False)
 
     @classmethod
+    def new(cls, username=None, password=None, session=DBSession):
+        manager = BCRYPTPasswordManager()
+        if not (username and password):
+            raise ValueError("Username and password needed")
+        hashed = manager.encode(password)
+        instance = cls(username=username, password=hashed)
+        session.add(instance)
+        session.flush()
+        return instance
+
+    @classmethod
     def get_by_id(cls, id, session=DBSession):
         return session.query(cls).filter(cls.id == id).one()
 
@@ -51,6 +62,23 @@ def login_page(request):
     return {'error': error}
 
 
+@view_config(route_name="new_account", renderer="string")
+def new_account_page(request):
+    error = ""
+    if request.method == "POST":
+        try:
+            make_new_account(request)
+        except Exception as e:
+            error = e
+    return {'error': error}
+
+
+def make_new_account(request):
+    username = request.params.get('username', None)
+    passsword = request.params.get('password', None)
+    User.new(username, passsword)
+
+
 def login(request):
     username = request.params.get("username", None)
     password = request.params.get("password", None)
@@ -67,3 +95,9 @@ def login(request):
 @view_config(route_name="home", renderer="text")
 def home(request):
     return "You are at the home page"
+
+
+@view_config(route_name="logout")
+def do_logout(request):
+    headers = forget(request)
+    return HTTPFound(request.route_url("login_page"), headers=headers)
