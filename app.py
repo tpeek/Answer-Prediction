@@ -76,6 +76,7 @@ def new_account_page(request):
             User.new(username, passsword)
         except Exception as e:
             error = e
+        return HTTPFound(request.route_url('home'))
     return {'error': error}
 
 
