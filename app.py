@@ -18,7 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    ""  # TODO update once database is set up
+    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
 )
 Base = declarative_base()
 
@@ -123,6 +123,11 @@ def app():
     config.scan()
     app = config.make_wsgi_app()
     return app
+
+
+def init_db():
+    engine = sa.create_engine(DATABASE_URL)
+    Base.metadata.create_all(engine)
 
 
 if __name__ == '__main__':
