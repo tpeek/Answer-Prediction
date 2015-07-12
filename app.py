@@ -51,7 +51,7 @@ class User(Base):
         return session.query(cls).filter(cls.username == username).one()
 
 
-@view_config(route_name="login_page", renderer="string")
+@view_config(route_name="login", renderer="string")
 def login_page(request):
     username = request.params.get('username', '')
     error = ""
@@ -94,7 +94,7 @@ def login(request):
     return manager.check(user.password, password)
 
 
-@view_config(route_name="home", renderer="text")
+@view_config(route_name="home", renderer="string")
 def home(request):
     return "You are at the home page"
 

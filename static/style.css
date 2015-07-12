@@ -1,0 +1,35 @@
+h1 {
+	text-align: center;
+	color: #0000ff;
+	background-color: #00ff00;
+	font-size: 60px;
+}
+
+#menu li {
+  display: inline-block;
+  text-align: left;
+  color: #ff0000;
+  font-size: 25px;
+
+}
+
+#entries li {
+	text-align: left;
+}
+
+#gatehelp li {
+  text-align: center;
+  display: inline-block;
+  color: #0000ff;
+}
+
+footer {
+   position:fixed;
+   bottom:0;
+   background-color: white;
+   text-align: right;
+}
+
+body {
+  background-image: url("http://geekslovebacon.com/wp-content/uploads/2014/01/clean-white-polygon-backgrounds-8.jpg")
+}
