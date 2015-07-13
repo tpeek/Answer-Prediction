@@ -1,0 +1,21 @@
+{% extends "base.jinja2" %}
+{% block section %}
+<main>
+  {% if error -%}
+  <p class="error"><strong>Error</strong>: {{ error }}</p>
+  {%- endif %}
+  <form action="{{ request.route_url('new_account') }}" method="POST">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username"/><br><br>
+    </div>
+    <div class="field">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password"/>
+    </div>
+    <div class="control_row">
+        <input type="submit" name="Login" value="Create"/><br><br><br>
+    </div>
+</form>
+</main>
+{% endblock %}
