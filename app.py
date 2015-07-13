@@ -5,6 +5,8 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from pyramid.security import remember, forget
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
 import sqlalchemy as sa
@@ -39,7 +41,6 @@ class User(Base):
         hashed = manager.encode(password)
         instance = cls(username=username, password=hashed)
         session.add(instance)
-        #session.flush()
         return instance
 
     @classmethod
@@ -55,6 +56,7 @@ class User(Base):
 def login_page(request):
     if request.method == "POST":
         username = request.params.get('username', '')
+        authenticated = False
         try:
             authenticated = login(request)
         except ValueError as e:
@@ -96,7 +98,7 @@ def login(request):
 
 @view_config(route_name="home", renderer='templates/homepage.jinja2')
 def home(request):
-    return {'msg': "You are at the home page"}
+    return {'logged_in': request.authenticated_userid}
 
 
 @view_config(route_name="logout")
@@ -123,7 +125,18 @@ def app():
     if not os.environ.get('TESTING', False):
         engine = sa.create_engine(DATABASE_URL)
         DBSession.configure(bind=engine)
-    config = Configurator(settings=settings)
+    auth_secret = os.environ.get('JOURNAL_AUTH_SECRET', "testing")
+    # and add a new value to the constructor for our Configurator:
+    authn_policy = AuthTktAuthenticationPolicy(
+        secret=auth_secret,
+        hashalg='sha512'
+    )
+    authz_policy = ACLAuthorizationPolicy()
+    config = Configurator(
+        settings=settings,
+        authentication_policy=authn_policy,
+        authorization_policy=authz_policy
+    )
     config.include('pyramid_tm')
     config.include('pyramid_jinja2')
     config.add_static_view('static', os.path.join(HERE, 'static'))
