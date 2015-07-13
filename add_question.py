@@ -11,14 +11,14 @@ DATABASE_URL = os.environ.get(
     #'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 HELP = """
-new / n: create new question
-delete / d: delete an existing question
-show / s: print out list of existing questions
-commit / c: commit changes
-rollback / r: rollback changes
-file / f: parse questions from file
-    file should contain questions seperated by new lines only
-exit / e: exit
+new / n:       create new question
+delete / d:    delete an existing question
+show / s:      print out list of existing questions
+commit / c:    commit changes
+rollback / r:  rollback changes
+file / f:      parse questions from file
+                 file should contain questions seperated by new lines only
+exit / e:      exit
 """
 
 
@@ -27,18 +27,21 @@ if __name__ == '__main__':
     session = sessionmaker(autoflush=True)
     session.configure(bind=engine)
     sess = session()
-    if sys.argv[-1] != "add_question.py":
+    if sys.argv[-1] != "add_question.py" and os.path.isfile(sys.argv[-1]):
         with open(sys.argv[-1]) as questions:
             for q in questions.read().split("\n"):
-                Question.new(q, sess)
-                print "Added " + q
+                if q not in Question.all(sess):
+                    Question.new(q, sess)
+                    print "Added ", q
+                else:
+                    print "Already in DB:", q
         sess.commit()
         print "Commited"
     else:
         for q in Question.all(sess):
                 print q.id, ":", q.text
         while True:
-            inp = raw_input("Enter Command:\n>")
+            inp = raw_input("Enter Command:\n>").lower()
             if inp in ["new", "n"]:
                     q = raw_input("Enter Question Text:\n>")
                     if q not in Question.all(sess):
