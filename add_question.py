@@ -35,8 +35,12 @@ if __name__ == '__main__':
                     print "Added ", q
                 else:
                     print "Already in DB:", q
-        sess.commit()
-        print "Commited"
+        if raw_input("Are you sure you want to commit? (Y/N)\n>"
+                     ).lower() in ['y', 'yes']:
+            sess.commit()
+            print "Commited"
+        else:
+            print "Did not commit"
     else:
         for q in Question.all(sess):
                 print q.id, ":", q.text
