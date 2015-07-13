@@ -65,6 +65,9 @@ def login_page(request):
         if authenticated:
             headers = remember(request, username)
             return HTTPFound(request.route_url('home'), headers=headers)
+
+        else:
+            return {'error': 'Not authenticated'}
     else:
         return {}
 
