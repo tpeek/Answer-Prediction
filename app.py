@@ -39,7 +39,7 @@ class User(Base):
         hashed = manager.encode(password)
         instance = cls(username=username, password=hashed)
         session.add(instance)
-        session.flush()
+        #session.flush()
         return instance
 
     @classmethod
