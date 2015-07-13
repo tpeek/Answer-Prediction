@@ -51,23 +51,23 @@ class User(Base):
         return session.query(cls).filter(cls.username == username).one()
 
 
-@view_config(route_name="login", renderer="string")
+@view_config(route_name="login", renderer="templates/gatepage.jinja2")
 def login_page(request):
-    username = request.params.get('username', '')
-    error = ""
     if request.method == "POST":
+        username = request.params.get('username', '')
         try:
             authenticated = login(request)
         except ValueError as e:
-            error = e
+            return {'error': e}
 
         if authenticated:
             headers = remember(request, username)
             return HTTPFound(request.route_url('home'), headers=headers)
-    return {'error': error}
+    else:
+        return {}
 
 
-@view_config(route_name="new_account", renderer="string")
+@view_config(route_name="new_account", renderer="templates/new_account.jinja2")
 def new_account_page(request):
     error = ""
     if request.method == "POST":
