@@ -94,15 +94,25 @@ def login(request):
     return manager.check(user.password, password)
 
 
-@view_config(route_name="home", renderer="string")
+@view_config(route_name="home", renderer='templates/homepage.jinja2')
 def home(request):
-    return "You are at the home page"
+    return {'msg': "You are at the home page"}
 
 
 @view_config(route_name="logout")
 def do_logout(request):
     headers = forget(request)
-    return HTTPFound(request.route_url("login_page"), headers=headers)
+    return HTTPFound(request.route_url("home"), headers=headers)
+
+
+@view_config(route_name="question", renderer='templates/questionpage.jinja2')
+def question(request):
+    return {}
+
+
+@view_config(route_name="faq", renderer='templates/faqpage.jinja2')
+def faq(request):
+    return {}
 
 
 def app():
@@ -121,6 +131,8 @@ def app():
     config.add_route('new_account', '/new_account')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('question', '/question')
+    config.add_route('faq', '/faq')
     config.scan()
     app = config.make_wsgi_app()
     return app
