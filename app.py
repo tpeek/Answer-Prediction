@@ -1,20 +1,23 @@
 #!/usr/bin/env python
-import os
 
+# python imports
+import os
+from random import randint
+# pyramid imports
 from pyramid.config import Configurator
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-
+# security imports
 from pyramid.security import remember, forget
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
-
+# sqlalchemy imports
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
-
+# server imports
 from waitress import serve
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -51,6 +54,28 @@ class User(Base):
     @classmethod
     def get_by_username(cls, username, session=DBSession):
         return session.query(cls).filter(cls.username == username).one()
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    text = sa.Column(sa.Unicode(), nullable=False, unique=True)
+
+    @classmethod
+    def new(cls, text, session=DBSession):
+        instance = cls(text=text)
+        print instance, instance.text
+        session.add(instance)
+        return instance
+
+    @classmethod
+    def all(cls, session=DBSession):
+        return session.query(cls).all()
+
+    @classmethod
+    def get_question_by_id(cls, id, session=DBSession):
+        return session.query(cls).filter(cls.id == id).one()
 
 
 @view_config(route_name="login", renderer="templates/gatepage.jinja2")
@@ -113,8 +138,16 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
-    return {}
-
+    if request.authenticated_userid:
+        if request.method == "POST":
+            pass
+            # TODO: store answer in some database...
+        questions = Question.all()
+        # TODO: only give a question the user has not answered.
+        question = questions[randint(0, len(questions) - 1)]
+        return {"question": question}
+    else:
+        HTTPFound(request.route_url("login"))
 
 @view_config(route_name="faq", renderer='templates/faqpage.jinja2')
 def faq(request):
