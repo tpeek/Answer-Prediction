@@ -98,7 +98,7 @@ def login(request):
 
 @view_config(route_name="home", renderer='templates/homepage.jinja2')
 def home(request):
-    return {'logged_in': request.authenticated_userid}
+    return {}
 
 
 @view_config(route_name="logout")
