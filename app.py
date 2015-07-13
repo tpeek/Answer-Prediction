@@ -138,16 +138,17 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
-    if request.authenticated_userid:
-        if request.method == "POST":
-            pass
-            # TODO: store answer in some database...
-        questions = Question.all()
-        # TODO: only give a question the user has not answered.
+    if request.method == "POST":
+        pass
+        # TODO: store answer in some database...
+    questions = Question.all()
+    # TODO: only give a question the user has not answered.
+    if questions:
         question = questions[randint(0, len(questions) - 1)]
         return {"question": question}
     else:
-        HTTPFound(request.route_url("login"))
+        return {"question": None}
+
 
 @view_config(route_name="faq", renderer='templates/faqpage.jinja2')
 def faq(request):
