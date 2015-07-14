@@ -21,6 +21,8 @@ from sqlalchemy.ext.declarative import declarative_base
 # server imports
 from waitress import serve
 
+import numpy as np
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
@@ -102,12 +104,18 @@ class Submission(Base):
         return session.query(cls).all()
 
     @classmethod
-    def get_all_for_question(cls, question_id, session=DBSession):
-        return session.query(cls).filter(cls.question_id == question_id).all()
+    def get_all_for_question(cls, question, session=DBSession):
+        return session.query(cls).filter(cls.question_id == question.id).all()
 
     @classmethod
     def get_all_for_user(cls, user, session=DBSession):
         return session.query(cls).filter(cls.user_id == user.id).all()
+
+    @classmethod
+    def get_answer(cls, user, question, session=DBSession):
+        return session.query(cls).filter(
+            cls.user_id == user.id).filter(cls.question_id == question.id
+                                           ).one().answer
 
 
 # -Views-
@@ -185,6 +193,7 @@ def question(request):
                 question=question,
                 answer=answer
             )
+
         questions = Question.all()
         if questions:
             submissions = Submission.get_all_for_user(user)
@@ -194,11 +203,17 @@ def question(request):
                     l.append(q)
             if l:
                 question = l[randint(0, len(l) - 1)]
+                x, u, y = make_data(question, user)
+                if not x == []:
+                    prediction = guess(x, u, y)
+                else:
+                    prediction = None
+                print prediction
             else:
-                return {"question": None}
-            return {"question": question}
+                return {"question": None, "prediction": None}
+            return {"question": question, "prediction": prediction}
         else:
-            return {"question": None}
+            return {"question": None, "prediction": None}
     else:
         return HTTPFound(request.route_url('home'))
 
@@ -206,6 +221,60 @@ def question(request):
 @view_config(route_name="about", renderer='templates/faqpage.jinja2')
 def faq(request):
     return {}
+
+
+def make_data(question, user):
+    x, y = [], []
+    l = []
+    questions = [Question.get_question_by_id(sub.question_id)
+                 for sub in Submission.get_all_for_user(user)
+                 ]
+
+    for q in questions:
+        x.append([])
+
+    questions.append(question)
+
+    for q in questions:
+        l.append([User.get_by_id(sub.user_id)
+                  for sub in Submission.get_all_for_question(q)
+                  ])
+
+    users = l[0]
+    for item in l:
+        users = list(
+            set(users) & set(item)
+        )
+
+    for i, slot in enumerate(x):
+        for user in users:
+            slot.append(Submission.get_answer(user, questions[i]))
+
+    for user in users:
+        y.append(Submission.get_answer(user, question))
+
+    u = [sub.answer for sub in Submission.get_all_for_user(user)]
+    return x, u, y
+# fuck...
+
+
+def guess(every_answer, user_answers, cur_question):
+    n = len(every_answer[0])
+    for each in every_answer:
+        if len(each) != n:
+            raise ValueError("Every list must be of the same length, asshole.")
+    every_answer.append(np.ones(n))
+    A = np.vstack(every_answer).T
+    every_x = np.linalg.lstsq(A, cur_question)[0]
+    total = 0
+    user_answers.append(1)  # the last value in every_x is c.
+    for the_x, u_ans in zip(every_x, user_answers):
+        total += u_ans * the_x
+    if total > 5:
+        total = 5
+    elif total < 1:
+        total = 1
+    return total
 
 
 # -App-
