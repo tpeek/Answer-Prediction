@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import sys
 from app import Question
@@ -6,19 +8,25 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    #'postgresql://wesleywooten@localhost:5432/AP_test'
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+    'postgresql://wesleywooten@localhost:5432/AP_test'
+    #'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
     #'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 HELP = """
-new / n:       create new question
-delete / d:    delete an existing question
-show / s:      print out list of existing questions
-commit / c:    commit changes
-rollback / r:  rollback changes
-file / f:      parse questions from file
-                 file should contain questions seperated by new lines only
-exit / e:      exit
+     new / n:    create new question
+
+  delete / d:    delete an existing question
+
+    show / s:    print out list of existing questions
+
+  commit / c:    commit changes
+
+rollback / r:    rollback changes
+
+    file / f:    parse questions from file
+                   file should contain questions seperated by new lines only
+
+    exit / e:    exit
 """
 
 
@@ -30,7 +38,8 @@ if __name__ == '__main__':
     if sys.argv[-1] != "add_question.py" and os.path.isfile(sys.argv[-1]):
         with open(sys.argv[-1]) as questions:
             for q in questions.read().split("\n"):
-                if q not in Question.all(sess):
+                q = unicode(q)
+                if not sess.query(Question).filter(Question.text == q).one():
                     Question.new(q, sess)
                     print "Added ", q
                 else:
@@ -40,6 +49,7 @@ if __name__ == '__main__':
             sess.commit()
             print "Commited"
         else:
+            sess.rollback()
             print "Did not commit"
     else:
         for q in Question.all(sess):
@@ -47,8 +57,9 @@ if __name__ == '__main__':
         while True:
             inp = raw_input("Enter Command:\n>").lower()
             if inp in ["new", "n"]:
-                    q = raw_input("Enter Question Text:\n>")
-                    if q not in Question.all(sess):
+                    q = unicode(raw_input("Enter Question Text:\n>"))
+                    if not sess.query(Question).filter(
+                            Question.text == q).one():
                         Question.new(q, sess)
                     else:
                         print "Question Must Be Unique"
