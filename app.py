@@ -203,7 +203,7 @@ def question(request):
         return HTTPFound(request.route_url('home'))
 
 
-@view_config(route_name="faq", renderer='templates/faqpage.jinja2')
+@view_config(route_name="about", renderer='templates/faqpage.jinja2')
 def faq(request):
     return {}
 
@@ -237,7 +237,7 @@ def app():
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('question', '/question')
-    config.add_route('faq', '/faq')
+    config.add_route('about', '/about')
     config.scan()
     app = config.make_wsgi_app()
     return app
