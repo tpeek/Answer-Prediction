@@ -198,7 +198,10 @@ def question(request):
             if l:
                 question = l[randint(0, len(l) - 1)]
                 x, u, y = make_data(question, user)
-                prediction = guess(x, u, y)
+                if not x == []:
+                    prediction = guess(x, u, y)
+                else:
+                    prediction = None
                 print prediction
             else:
                 return {"question": None, "prediction": None}
@@ -218,15 +221,20 @@ def make_data(question, user):
     x, y = [], []
     l = []
     questions = [Question.get_question_by_id(sub.question_id)
-                 for sub in Submission.get_all_for_user(user)]
-    questions.append(question)
+                 for sub in Submission.get_all_for_user(user)
+                 ]
 
     for q in questions:
         x.append([])
-        l.append([User.get_by_id(sub.user_id)
-                  for sub in Submission.get_all_for_question(q)])
-    users = l[0]
 
+    questions.append(question)
+
+    for q in questions:
+        l.append([User.get_by_id(sub.user_id)
+                  for sub in Submission.get_all_for_question(q)
+                  ])
+
+    users = l[0]
     for item in l:
         users = list(
             set(users) & set(item)
@@ -238,6 +246,7 @@ def make_data(question, user):
 
     for user in users:
         y.append(Submission.get_answer(user, question))
+
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
     return x, u, y
 # fuck...
@@ -255,6 +264,10 @@ def guess(every_answer, user_answers, cur_question):
     user_answers.append(1)  # the last value in every_x is c.
     for the_x, u_ans in zip(every_x, user_answers):
         total += u_ans * the_x
+    if total > 5:
+        total = 5
+    elif total < 1:
+        total = 1
     return total
 
 
