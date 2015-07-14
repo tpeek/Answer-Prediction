@@ -167,10 +167,19 @@ def test_username_already_exists(testapp, new_user):
         # 'password2': "testpassword"
     }
     response = testapp.post('/new_account', params=kwargs, status='2*')
-    assert "Error" in response.body
+    assert "<strong>Error</strong>" in response.body
 
 
 # Test 7
+# getting the question page from an unauthenticated hacker
+def test_get_question_view_unauth(testapp):
+    response = testapp.get('/question', status='3*')
+    assert response.status_code == 302  # redirect out
+    redirected = response.follow()
+    assert "<main id=home>" in redirected.body
+
+
+# Test 8
 # posting a submission from an unauthenticated hacker
 def test_post_to_question_view_unauth(testapp):
     params = {
@@ -180,9 +189,11 @@ def test_post_to_question_view_unauth(testapp):
     }
     response = testapp.post('/question', params=params, status='3*')
     assert response.status_code == 302  # redirect out
+    redirected = response.follow()
+    assert "<main id=home>" in redirected.body
 
 
-# Test 8
+# Test 9
 # trying to submit without params
 """def test_add_no_params(testapp):
     test_login_success(testapp)
