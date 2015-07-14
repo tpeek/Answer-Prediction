@@ -45,7 +45,7 @@ class User(Base):
         manager = BCRYPTPasswordManager()
         if not (username and password):
             raise ValueError("Username and password needed")
-        hashed = manager.encode(password)
+        hashed = unicode(manager.encode(password))
         try:
             instance = cls(username=username, password=hashed)
             session.add(instance)
