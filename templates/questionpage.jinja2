@@ -1,7 +1,36 @@
 {% extends "base.jinja2" %}
 {% block section %}
     <main>
-      <input id="question" value="question"></input>
-      <input id="choices" value="the choices"></input>
+        {% if request.authenticated_userid %}
+            {% if question is none %}
+                <p>There are no questions</p>
+            {% else %}
+                {{ question.text }}
+
+                <form action="{{ request.route_url('question') }}"
+                method="POST" class="question_form">
+                    <ol>
+                        <li>
+                            <input type="radio" name="answer" value="1">
+                            Strongly Disagree</li>
+                        <li>
+                            <input type="radio" name="answer" value="2">
+                            Disagree</li>
+                        <li>
+                            <input type="radio" name="answer" value="3">
+                            Neutral</li>
+                        <li>
+                            <input type="radio" name="answer" value="4">
+                            Agree</li>
+                        <li>
+                            <input type="radio" name="answer" value="5">
+                            Strongly Agree</li>
+                    </ol>
+                    <input type="submit" value="Submit" name="submit"/>
+                </form>
+                {% endif %}
+            {% else %}
+            <p>Please log in to answer questions</p>
+            {% endif %}
     </main>
 {% endblock %}
