@@ -14,7 +14,11 @@
           <li><a href="{{ request.route_url('home') }}" class="selected">Home</a></li>
           <li><a href="{{ request.route_url('question') }}" >Questions</a></li>
           <li><a href="{{ request.route_url('faq') }}">FAQ</a></li>
+          {% if request.authenticated_userid %}
+          <li><a href="{{ request.route_url('logout') }}" >Logout</a></li>
+          {% else %}
           <li><a href="{{ request.route_url('login') }}" >Login</a></li>
+          {% endif %}
           <li><a href="{{ request.route_url('new_account') }}" >New User</a></li>
         </ul>
       </nav>

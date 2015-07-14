@@ -24,7 +24,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+    'postgresql://wesleywooten@localhost:5432/AP_test'
+    # 'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
     # 'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 Base = declarative_base()
@@ -166,31 +167,34 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
-    user = User.get_by_username(request.authenticated_userid)
-    if request.method == "POST":
-        answer = request.params.get("answer")
-        question = Question.get_question_by_id(
-            request.params.get("question_id")
-        )
-        Submission.new(
-            user=user,
-            question=question,
-            answer=answer
-        )
-    questions = Question.all()
-    if questions:
-        submissions = Submission.get_all_for_user(user)
-        l = []
-        for q in questions:
-            if q.id not in [s.question_id for s in submissions]:
-                l.append(q)
-        if l:
-            question = l[randint(0, len(l) - 1)]
+    if request.authenticated_userid:
+        user = User.get_by_username(request.authenticated_userid)
+        if request.method == "POST":
+            answer = request.params.get("answer")
+            question = Question.get_question_by_id(
+                request.params.get("question_id")
+            )
+            Submission.new(
+                user=user,
+                question=question,
+                answer=answer
+            )
+        questions = Question.all()
+        if questions:
+            submissions = Submission.get_all_for_user(user)
+            l = []
+            for q in questions:
+                if q.id not in [s.question_id for s in submissions]:
+                    l.append(q)
+            if l:
+                question = l[randint(0, len(l) - 1)]
+            else:
+                return {"question": None}
+            return {"question": question}
         else:
             return {"question": None}
-        return {"question": question}
     else:
-        return {"question": None}
+        return HTTPFound(request.route_url('home'))
 
 
 @view_config(route_name="faq", renderer='templates/faqpage.jinja2')
