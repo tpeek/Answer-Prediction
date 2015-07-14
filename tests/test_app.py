@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import os
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 from cryptacular.bcrypt import BCRYPTPasswordManager
 import sys
 
@@ -51,7 +52,7 @@ def db_session(request, connection):
 def test_create_user(db_session):
     kwargs = {
         'username': "Test_Username",
-        'password': "testpassword",
+        'password': "testpassword"
         # 'password2': "testpassword"
     }
     kwargs['session'] = db_session
@@ -86,7 +87,20 @@ def test_provide_answer(db_session):
 
 
 # Test 3
-# leaving second password field blank
+# submission of answer sans answer
+def test_provide_no_answer(db_session):
+    kwargs = {
+        'question_id': '5',
+        'user_id': '14'
+    }
+    submission = app.Submission(**kwargs)
+    db_session.add(submission)
+    with pytest.raises(IntegrityError):
+        db_session.flush()
+
+
+# Test 4
+# leaving second field blank
 def test_create_user_failure(db_session):
     kwargs = {'username': "Test_Username"}
     kwargs['session'] = db_session
@@ -109,7 +123,7 @@ def testapp():
 def new_user(db_session):
     kwargs = {
         'username': "Test_Username",
-        'password': "testpassword",
+        'password': "testpassword"
         # 'password2': "testpassword"
     }
     kwargs['session'] = db_session
@@ -133,7 +147,7 @@ def new_submission(db_session):
     return submission"""
 
 
-# Test 4
+# Test 5
 # getting homepage with a user in the database ready to be used
 def test_homepage(testapp, new_user):
     response = testapp.get('/')
@@ -144,19 +158,19 @@ def test_homepage(testapp, new_user):
     # assert getattr(new_user, 'password2', '') == "testpassword"
 
 
-# Test 5
+# Test 6
 # try to create a username that already exists
 def test_username_already_exists(testapp, new_user):
     kwargs = {
         'username': "Test_Username",
-        'password': "testpassword",
+        'password': "testpassword"
         # 'password2': "testpassword"
     }
     response = testapp.post('/new_account', params=kwargs, status='2*')
     assert "Error" in response.body
 
 
-# Test 6
+# Test 7
 # posting a submission from an unauthenticated hacker
 def test_post_to_question_view_unauth(testapp):
     params = {
@@ -168,7 +182,7 @@ def test_post_to_question_view_unauth(testapp):
     assert response.status_code == 302  # redirect out
 
 
-# Test 7
+# Test 8
 # trying to submit without params
 """def test_add_no_params(testapp):
     test_login_success(testapp)
