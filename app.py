@@ -24,12 +24,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
-    #'postgresql://power_user:nopassword@localhost:5432/test1'
+    'postgresql://wesleywooten@localhost:5432/AP_test'
+    # 'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+    # 'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 Base = declarative_base()
 
 
+# -Models-
 class User(Base):
     __tablename__ = 'users'
 
@@ -65,7 +67,6 @@ class Question(Base):
     @classmethod
     def new(cls, text, session=DBSession):
         instance = cls(text=text)
-        print instance, instance.text
         session.add(instance)
         return instance
 
@@ -78,6 +79,34 @@ class Question(Base):
         return session.query(cls).filter(cls.id == id).one()
 
 
+class Submission(Base):
+    __tablename__ = "answers"
+
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    user_id = sa.Column(sa.Integer, nullable=False)
+    question_id = sa.Column(sa.Integer, nullable=False)
+    answer = sa.Column(sa.Integer, nullable=False)
+
+    @classmethod
+    def new(cls, user, question, answer, session=DBSession):
+        instance = cls(user_id=user.id, question_id=question.id, answer=answer)
+        session.add(instance)
+        return instance
+
+    @classmethod
+    def all(cls, session=DBSession):
+        return session.query(cls).all()
+
+    @classmethod
+    def get_all_for_question(cls, question_id, session=DBSession):
+        return session.query(cls).filter(cls.question_id == question_id).all()
+
+    @classmethod
+    def get_all_for_user(cls, user, session=DBSession):
+        return session.query(cls).filter(cls.user_id == user.id).all()
+
+
+# -Views-
 @view_config(route_name="login", renderer="templates/gatepage.jinja2")
 def login_page(request):
     if request.method == "POST":
@@ -138,13 +167,28 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
+    user = User.get_by_username(request.authenticated_userid)
     if request.method == "POST":
-        pass
-        # TODO: store answer in some database...
+        answer = request.params.get("answer")
+        question = Question.get_question_by_id(
+            request.params.get("question_id")
+        )
+        Submission.new(
+            user=user,
+            question=question,
+            answer=answer
+        )
     questions = Question.all()
-    # TODO: only give a question the user has not answered.
     if questions:
-        question = questions[randint(0, len(questions) - 1)]
+        submissions = Submission.get_all_for_user(user)
+        l = []
+        for q in questions:
+            if q.id not in [s.question_id for s in submissions]:
+                l.append(q)
+        if l:
+            question = l[randint(0, len(l) - 1)]
+        else:
+            return {"question": None}
         return {"question": question}
     else:
         return {"question": None}
@@ -155,6 +199,7 @@ def faq(request):
     return {}
 
 
+# -App-
 def app():
     debug = os.environ.get('DEBUG', True)
     settings = {}

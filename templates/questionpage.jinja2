@@ -9,6 +9,7 @@
 
                 <form action="{{ request.route_url('question') }}"
                 method="POST" class="question_form">
+                <input type="hidden" name="question_id" value={{ question.id }}>
                     <ol>
                         <li>
                             <input type="radio" name="answer" value="1">
