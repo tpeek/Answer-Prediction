@@ -17,7 +17,7 @@ os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
 os.environ['TESTING'] = "True"
 
-sys.path.insert(0, '/Users/jesse/Projects/Answer-Prediction')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import app
 
 
@@ -195,7 +195,14 @@ def test_post_to_question_view_unauth(testapp):
 
 # Test 9
 # trying to submit without params
-"""def test_add_no_params(testapp):
+"""def test_submit_with_no_params(testapp):
     test_login_success(testapp)
-    response = testapp.post('/add', status=500)
+    response = testapp.post('/question', status=500)
     assert 'IntegrityError' in response.body"""
+
+
+# Test 10
+# trying to submit without params
+"""def test_submit_with_params(testapp):
+    test_login_success(testapp)
+    response = testapp.post('/question', status=200)"""
