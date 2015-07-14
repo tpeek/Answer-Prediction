@@ -11,14 +11,20 @@ DATABASE_URL = os.environ.get(
     #'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 HELP = """
-new / n:       create new question
-delete / d:    delete an existing question
-show / s:      print out list of existing questions
-commit / c:    commit changes
-rollback / r:  rollback changes
-file / f:      parse questions from file
-                 file should contain questions seperated by new lines only
-exit / e:      exit
+     new / n:    create new question
+
+  delete / d:    delete an existing question
+
+    show / s:    print out list of existing questions
+
+  commit / c:    commit changes
+
+rollback / r:    rollback changes
+
+    file / f:    parse questions from file
+                   file should contain questions seperated by new lines only
+
+    exit / e:    exit
 """
 
 
@@ -40,6 +46,7 @@ if __name__ == '__main__':
             sess.commit()
             print "Commited"
         else:
+            sess.rollback()
             print "Did not commit"
     else:
         for q in Question.all(sess):
