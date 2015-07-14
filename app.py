@@ -14,6 +14,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 # sqlalchemy imports
 import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
@@ -43,9 +44,13 @@ class User(Base):
         manager = BCRYPTPasswordManager()
         if not (username and password):
             raise ValueError("Username and password needed")
-        hashed = manager.encode(password)
-        instance = cls(username=username, password=hashed)
-        session.add(instance)
+        hashed = unicode(manager.encode(password))
+        try:
+            instance = cls(username=username, password=hashed)
+            session.add(instance)
+            session.flush()
+        except IntegrityError:
+            raise ValueError("Username already in use")
         return instance
 
     @classmethod
@@ -134,9 +139,11 @@ def new_account_page(request):
             username = request.params.get('username', None)
             passsword = request.params.get('password', None)
             User.new(username, passsword)
+            headers = remember(request, username)
+            return HTTPFound(request.route_url('home'), headers=headers)
         except Exception as e:
             error = e
-        return HTTPFound(request.route_url('home'))
+            return {'error': error}
     return {'error': error}
 
 
