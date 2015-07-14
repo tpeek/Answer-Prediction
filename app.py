@@ -20,6 +20,8 @@ from sqlalchemy.ext.declarative import declarative_base
 # server imports
 from waitress import serve
 
+import numpy as np
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
@@ -109,7 +111,7 @@ class Submission(Base):
     def get_answer(cls, user, question, session=DBSession):
         return session.query(cls).filter(
             cls.user_id == user.id).filter(cls.question_id == question.id
-                                           ).one()
+                                           ).one().answer
 
 
 # -Views-
@@ -195,12 +197,14 @@ def question(request):
                     l.append(q)
             if l:
                 question = l[randint(0, len(l) - 1)]
-                print make_data(question, user)
+                x, u, y = make_data(question, user)
+                prediction = guess(x, u, y)
+                print prediction
             else:
-                return {"question": None}
-            return {"question": question}
+                return {"question": None, "prediction": None}
+            return {"question": question, "prediction": prediction}
         else:
-            return {"question": None}
+            return {"question": None, "prediction": None}
     else:
         return HTTPFound(request.route_url('home'))
 
@@ -239,8 +243,19 @@ def make_data(question, user):
 # fuck...
 
 
-def dummy(x, u, y):
-    return 2.72
+def guess(every_answer, user_answers, cur_question):
+    n = len(every_answer[0])
+    for each in every_answer:
+        if len(each) != n:
+            raise ValueError("Every list must be of the same length, asshole.")
+    every_answer.append(np.ones(n))
+    A = np.vstack(every_answer).T
+    every_x = np.linalg.lstsq(A, cur_question)[0]
+    total = 0
+    user_answers.append(1)  # the last value in every_x is c.
+    for the_x, u_ans in zip(every_x, user_answers):
+        total += u_ans * the_x
+    return total
 
 
 # -App-
