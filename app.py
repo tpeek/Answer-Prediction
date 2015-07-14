@@ -97,12 +97,17 @@ class Submission(Base):
         return session.query(cls).all()
 
     @classmethod
-    def get_all_for_question(cls, question_id, session=DBSession):
-        return session.query(cls).filter(cls.question_id == question_id).all()
+    def get_all_for_question(cls, question, session=DBSession):
+        return session.query(cls).filter(cls.question_id == question.id).all()
 
     @classmethod
     def get_all_for_user(cls, user, session=DBSession):
         return session.query(cls).filter(cls.user_id == user.id).all()
+
+    @classmethod
+    def get_answer(cls, user, question, session=DBSession):
+        return session.query(cls).filter(cls.user_id == user.id and
+                                         cls.question_id == question.id).one()
 
 
 # -Views-
@@ -178,6 +183,7 @@ def question(request):
                 question=question,
                 answer=answer
             )
+
         questions = Question.all()
         if questions:
             submissions = Submission.get_all_for_user(user)
@@ -187,6 +193,7 @@ def question(request):
                     l.append(q)
             if l:
                 question = l[randint(0, len(l) - 1)]
+                print make_data(question, user)
             else:
                 return {"question": None}
             return {"question": question}
@@ -199,6 +206,39 @@ def question(request):
 @view_config(route_name="faq", renderer='templates/faqpage.jinja2')
 def faq(request):
     return {}
+
+
+def make_data(question, user):
+    x, y = [], []
+    l = []
+    questions = [Question.get_question_by_id(sub.question_id)
+                 for sub in Submission.get_all_for_user(user)]
+    questions.append(question)
+
+    for q in questions:
+        x.append([])
+        l.append([User.get_by_id(sub.user_id)
+                  for sub in Submission.get_all_for_question(q)])
+    users = l[0]
+
+    for item in l:
+        users = list(
+            set(users) & set(item)
+        )
+
+    for i, slot in enumerate(x):
+        for u in users:
+            x.append(Submission.get_answer(u, questions[i]))
+
+    for u in users:
+        y.append(Submission.get_answer(u, question))
+
+    return x, user, y
+# fuck...
+
+
+def dummy(x, u, y):
+    return 2.72
 
 
 # -App-
