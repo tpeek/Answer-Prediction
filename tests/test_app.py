@@ -10,15 +10,18 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
+    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
 os.environ['TESTING'] = "True"
 
-sys.path.insert(0, '/Users/jesse/Projects/Answer-Prediction')
+sys.path.insert(0, '/Users/jameshemmaplardh/projects/AnswerPrediction/Answer-Prediction')
 import app
 
+
+#makes db
+createdb test-project1
 
 # Fixture 1
 # create session connection
