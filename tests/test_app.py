@@ -57,8 +57,9 @@ def test_create_user(db_session):
     kwargs['session'] = db_session
     user = app.User.new(**kwargs)
     db_session.flush()
-    assert getattr(user, 'id', '') is not None
-    assert getattr(user, 'username', '') == "Test_Username"
+    u = db_session.query(app.User).filter(app.User.id == user.id).one()
+    assert getattr(u, 'id', '') is not None
+    assert getattr(u, 'username', '') == "Test_Username"
     manager = BCRYPTPasswordManager()
     assert manager.check(getattr(user, 'password', ''), "testpassword")
     # assert getattr(user, 'password2', '') == "testpassword"
@@ -68,17 +69,20 @@ def test_create_user(db_session):
 # submission of answer
 def test_provide_answer(db_session):
     kwargs = {
-        'question_id': 5,
-        'user_id': 14,
-        'answer': 3
+        'question_id': '5',
+        'user_id': '14',
+        'answer': '3'
     }
     submission = app.Submission(**kwargs)
     db_session.add(submission)
     db_session.flush()
-    assert getattr(submission, 'id', '') is not None
-    assert getattr(submission, 'question_id', '') is 5
-    assert getattr(submission, 'user_id', '') is 14
-    assert getattr(submission, 'answer', '') is 3
+    s = db_session.query(app.Submission).filter(
+        app.Submission.id == submission.id
+    ).one()
+    assert getattr(s, 'id', '') is not None
+    assert getattr(s, 'question_id', '') is '5'
+    assert getattr(s, 'user_id', '') is '14'
+    assert getattr(s, 'answer', '') is '3'
 
 
 # Test 3
@@ -156,9 +160,9 @@ def test_username_already_exists(testapp, new_user):
 # posting a submission from an unauthenticated hacker
 def test_post_to_question_view_unauth(testapp):
     params = {
-        'question_id': 5,
-        'user_id': 14,
-        'answer': 3
+        'question_id': '5',
+        'user_id': '14',
+        'answer': '3'
     }
     response = testapp.post('/question', params=params, status='3*')
     assert response.status_code == 302  # redirect out
