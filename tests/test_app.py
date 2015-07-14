@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 import os
 import pytest
 from sqlalchemy import create_engine
-import webtest
-from pyramid import testing
 from cryptacular.bcrypt import BCRYPTPasswordManager
 import sys
 
@@ -68,19 +66,19 @@ def test_create_user(db_session):
 
 # Test 2
 # submission of answer
-"""def test_provide_answer(db_session):
+def test_provide_answer(db_session):
     kwargs = {
         'question_id': 5,
         'user_id': 14,
-        # 'answer': 3
+        'answer': 3
     }
-    kwargs['session'] = db_session
-    entry = app.Question.new(**kwargs)
+    submission = app.Submission(**kwargs)
+    db_session.add(submission)
     db_session.flush()
-    assert getattr(entry, id, '') is not None
-    assert getattr(entry, 'question_id', '') is 5
-    assert getattr(entry, 'user_id', '') is 14
-    # assert getattr(entry, 'answer', '') is 3"""
+    assert getattr(submission, 'id', '') is not None
+    assert getattr(submission, 'question_id', '') is 5
+    assert getattr(submission, 'user_id', '') is 14
+    assert getattr(submission, 'answer', '') is 3
 
 
 # Test 3
@@ -123,10 +121,10 @@ def new_submission(db_session):
     kwargs = {
         'question_id': 5,
         'user_id': 14,
-        # 'answer': 3
+        'answer': 3
     }
-    kwargs['session'] = db_session
-    submission = app.Question.new(**kwargs)
+    submission = app.Submission(**kwargs)
+    db_session.add(submission)
     db_session.flush()
     return submission"""
 
@@ -143,25 +141,27 @@ def test_homepage(testapp, new_user):
 
 
 # Test 5
-# getting homepage with a user in the database ready to be used
-"""def test_post_to_add_view(testapp, new_submission):
-    params = {
-        'question_id': 5,
-        'user_id': 14,
-        # 'answer': 3
+# try to create a username that already exists
+def test_username_already_exists(testapp, new_user):
+    kwargs = {
+        'username': "Test_Username",
+        'password': "testpassword",
+        # 'password2': "testpassword"
     }
-    response = testapp.post('/add', params=params, status='3*')
-    assert response.status_code == 300
-    assert getattr(new_submission, 'question_id', '') is 5
-    assert getattr(new_submission, 'user_id', '') is 14
-    # assert getattr(new_submission, 'answer', '') is 3"""
+    response = testapp.post('/new_account', params=kwargs, status='2*')
+    assert "Error" in response.body
 
 
 # Test 6
-# trying to get '/add'
-def test_try_to_get(testapp):
-    with pytest.raises(webtest.AppError):
-        testapp.get('/add')
+# posting a submission from an unauthenticated hacker
+def test_post_to_question_view_unauth(testapp):
+    params = {
+        'question_id': 5,
+        'user_id': 14,
+        'answer': 3
+    }
+    response = testapp.post('/question', params=params, status='3*')
+    assert response.status_code == 302  # redirect out
 
 
 # Test 7
