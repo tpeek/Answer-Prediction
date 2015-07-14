@@ -8,8 +8,8 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    #'postgresql://wesleywooten@localhost:5432/AP_test'
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+    'postgresql://wesleywooten@localhost:5432/AP_test'
+    #'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
     #'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 HELP = """
@@ -38,7 +38,8 @@ if __name__ == '__main__':
     if sys.argv[-1] != "add_question.py" and os.path.isfile(sys.argv[-1]):
         with open(sys.argv[-1]) as questions:
             for q in questions.read().split("\n"):
-                if q not in Question.all(sess):
+                q = unicode(q)
+                if not sess.query(Question).filter(Question.text == q).one():
                     Question.new(q, sess)
                     print "Added ", q
                 else:
@@ -56,8 +57,9 @@ if __name__ == '__main__':
         while True:
             inp = raw_input("Enter Command:\n>").lower()
             if inp in ["new", "n"]:
-                    q = raw_input("Enter Question Text:\n>")
-                    if q not in Question.all(sess):
+                    q = unicode(raw_input("Enter Question Text:\n>"))
+                    if not sess.query(Question).filter(
+                            Question.text == q).one():
                         Question.new(q, sess)
                     else:
                         print "Question Must Be Unique"
