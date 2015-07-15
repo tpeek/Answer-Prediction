@@ -22,15 +22,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from waitress import serve
 
 import numpy as np
+#from recaptcha import captcha
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://wesleywooten@localhost:5432/AP_test'
-    # 'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
-    # 'postgresql://power_user:nopassword@localhost:5432/test1'
-)
+    'DATABASE_URL')
 Base = declarative_base()
 
 
@@ -44,6 +41,7 @@ class User(Base):
 
     @classmethod
     def new(cls, username=None, password=None, session=DBSession):
+        """Stores password in database already hashed"""
         manager = BCRYPTPasswordManager()
         if not (username and password):
             raise ValueError("Username and password needed")
@@ -87,6 +85,7 @@ class Question(Base):
 
 
 class Submission(Base):
+    """Stores answers tied to a user id and a question id"""
     __tablename__ = "answers"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
@@ -189,7 +188,7 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            if answer is not None:
+            if answer is not None and question.id not in Submission.get_all_for_user(user):
                 Submission.new(
                     user=user,
                     question=question,
@@ -205,7 +204,7 @@ def question(request):
             if l:
                 question = l[randint(0, len(l) - 1)]
                 x, u, y = make_data(question, user)
-                if not x == []:
+                if x != [] and y != []:
                     prediction = guess(x, u, y)
                 else:
                     prediction = None
@@ -224,38 +223,53 @@ def faq(request):
 
 
 def make_data(question, user):
-    x, y = [], []
-    l = []
+    """Gets data from the database and parses it for the Guess function"""
+    questions, u = _get_data(user, question)
+    users = _select_users(u, questions, user)
+    x = _parse_into_matrix(questions, users)
+    y = []
+    for user in users:
+        y.append(Submission.get_answer(user, question))
+    u = [sub.answer for sub in Submission.get_all_for_user(user)]
+    return x, u, y
+
+
+def _select_users(u, questions, user):
+    users = u[0]
+    for item in u:
+            users = list(
+                set(users) & set(item)
+            )
+    return users
+
+
+def _get_data(user, question):
+    """Queries database for all the questions the user has answered
+    then queries for all the users that have answered all those
+    questions plus the question that the user is currently answering"""
+    users = []
     questions = [Question.get_question_by_id(sub.question_id)
                  for sub in Submission.get_all_for_user(user)
                  ]
 
-    for q in questions:
-        x.append([])
-
     questions.append(question)
 
     for q in questions:
-        l.append([User.get_by_id(sub.user_id)
-                  for sub in Submission.get_all_for_question(q)
-                  ])
+        users.append([User.get_by_id(sub.user_id)
+                      for sub in Submission.get_all_for_question(q)
+                      ])
+    return questions, users
 
-    users = l[0]
-    for item in l:
-        users = list(
-            set(users) & set(item)
-        )
 
+def _parse_into_matrix(questions, users):
+    """Sets matrix x to have a column for each question the
+    user has answered, and fills each column with answers that
+    the users have answered in the same order for each column"""
+    x = [[] for q in range(len(questions) - 1)]
     for i, slot in enumerate(x):
         for user in users:
             slot.append(Submission.get_answer(user, questions[i]))
-
-    for user in users:
-        y.append(Submission.get_answer(user, question))
-
-    u = [sub.answer for sub in Submission.get_all_for_user(user)]
-    return x, u, y
-# fuck...
+    return x
 
 
 def guess(every_answer, user_answers, cur_question):
@@ -286,7 +300,7 @@ def app():
     if not os.environ.get('TESTING', False):
         engine = sa.create_engine(DATABASE_URL)
         DBSession.configure(bind=engine)
-    auth_secret = os.environ.get('JOURNAL_AUTH_SECRET', "testing")
+    auth_secret = os.environ.get('AUTH_SECRET', "testing")
     # and add a new value to the constructor for our Configurator:
     authn_policy = AuthTktAuthenticationPolicy(
         secret=auth_secret,

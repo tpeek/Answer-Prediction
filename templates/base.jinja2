@@ -2,24 +2,25 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title> SE | ^_^ </title>
+    <title> Sherlock Engine | We Can Read Your Mind </title>
     <link rel="shortcut icon" href="http://www.afi.com/silver/images/films/2012/v9i5/sherlockholmessilhouette.jpg">
     <link href="/static/style.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Tangerine' rel='stylesheet' type='text/css'>
     <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="/static/script.js"></script>
   </head>
   <body>
     <header>
-      <h1>SherlockEngine - Python can read your mind. </h1>
+      <h1 id="logo">Sherlock&nbsp;&nbsp;&nbsp;&nbsp;Engine</h1>
       </a>
       <nav>
         <ul id="menu">
           <li><a href="{{ request.route_url('home') }}" class="selected">Home</a></li>
+          <li><a href="{{ request.route_url('about') }}">About</a></li>
           <li><a href="{{ request.route_url('question') }}" >Questions</a></li>
           {% if request.authenticated_userid %}
           <li><a href="{{ request.route_url('logout') }}" >Logout</a></li>
           {% else %}
-          <li><a href="{{ request.route_url('about') }}">About</a></li>
           <li><a href="{{ request.route_url('login') }}" >Login</a></li>
           {% endif %}
           <li><a href="{{ request.route_url('new_account') }}" >New User</a></li>
