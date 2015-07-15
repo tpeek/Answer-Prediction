@@ -27,8 +27,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    #'postgresql://wesleywooten@localhost:5432/AP_test'
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+    'postgresql://wesleywooten@localhost:5432/AP_test'
+    #'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
     #'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 Base = declarative_base()
@@ -44,6 +44,7 @@ class User(Base):
 
     @classmethod
     def new(cls, username=None, password=None, session=DBSession):
+        """Stores password in database already hashed"""
         manager = BCRYPTPasswordManager()
         if not (username and password):
             raise ValueError("Username and password needed")
@@ -87,6 +88,7 @@ class Question(Base):
 
 
 class Submission(Base):
+    """Stores answers tied to a user id and a question id"""
     __tablename__ = "answers"
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
@@ -224,8 +226,22 @@ def faq(request):
 
 
 def make_data(question, user):
-    x, y = [], []
-    l = []
+    questions, x, u = _get_data(user)
+    users = u[0]
+    for item in u:
+        users = list(
+            set(users) & set(item)
+        )
+    x = _parse_into_matrix(x, questions, users)
+    y = []
+    for user in users:
+        y.append(Submission.get_answer(user, question))
+    u = [sub.answer for sub in Submission.get_all_for_user(user)]
+    return x, u, y
+
+
+def _get_data(user):
+    x, users = [], []
     questions = [Question.get_question_by_id(sub.question_id)
                  for sub in Submission.get_all_for_user(user)
                  ]
@@ -236,26 +252,18 @@ def make_data(question, user):
     questions.append(question)
 
     for q in questions:
-        l.append([User.get_by_id(sub.user_id)
-                  for sub in Submission.get_all_for_question(q)
-                  ])
+        users.append([User.get_by_id(sub.user_id)
+                      for sub in Submission.get_all_for_question(q)
+                      ])
+    return questions, x, users
 
-    users = l[0]
-    for item in l:
-        users = list(
-            set(users) & set(item)
-        )
 
+def _parse_into_matrix(x, questions, users):
+    """"""
     for i, slot in enumerate(x):
         for user in users:
             slot.append(Submission.get_answer(user, questions[i]))
-
-    for user in users:
-        y.append(Submission.get_answer(user, question))
-
-    u = [sub.answer for sub in Submission.get_all_for_user(user)]
-    return x, u, y
-# fuck...
+    return x
 
 
 def guess(every_answer, user_answers, cur_question):
@@ -286,7 +294,7 @@ def app():
     if not os.environ.get('TESTING', False):
         engine = sa.create_engine(DATABASE_URL)
         DBSession.configure(bind=engine)
-    auth_secret = os.environ.get('JOURNAL_AUTH_SECRET', "testing")
+    auth_secret = os.environ.get('AUTH_SECRET', "testing")
     # and add a new value to the constructor for our Configurator:
     authn_policy = AuthTktAuthenticationPolicy(
         secret=auth_secret,
