@@ -66,10 +66,10 @@ footer {
 }
 
 #home {
+  margin-left: 10%;
   color: Navy;
-  width: 90%;
+  width: 60%;
   top: 20%;
-  margin: auto;
   padding: 20px;
 }
 
