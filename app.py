@@ -20,6 +20,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
 # server imports
 from waitress import serve
+from recaptcha.client import captcha
 
 import numpy as np
 
@@ -33,6 +34,24 @@ DATABASE_URL = os.environ.get(
 )
 Base = declarative_base()
 
+
+#skeleteon fo captcha
+def captcha():
+    if req.method == 'POST':
+        response = captcha.submit(
+            req.args['recaptcha_challenge_field'],
+            req.args['recaptcha_response_field'],
+            self.private_key,
+            req.remote_addr,
+            )
+        if not response.is_valid:
+            say_captcha_is_invalid()
+        else:
+            do_something_useful()
+    else:
+        data['recaptcha_javascript'] = captcha.displayhtml(self.public_key)
+        data['recaptcha_theme'] = self.theme
+        return 'recaptchaticket.html', data, n
 
 # -Models-
 class User(Base):
