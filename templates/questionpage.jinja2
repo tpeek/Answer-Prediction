@@ -5,35 +5,37 @@
             {% if question is none %}
                 <p>There are no questions</p>
             {% else %}
-                {{ question.text }}
 
+            <div id="questions">
+                <p id="q_text">{{ question.text }}</p>
                 <form action="{{ request.route_url('question') }}"
                 method="POST" class="question_form">
-                <input type="hidden" name="question_id" value={{ question.id }}>
-                    <ol>
+                <input id="qu" type="hidden" name="question_id" value={{ question.id }}>
+                    <ul id="choices">
                         <li>
-                            <input type="radio" name="answer" value="1">
+                            1<br><input type="radio" name="answer" value="1"><br>
                             Strongly Disagree</li>
                         <li>
-                            <input type="radio" name="answer" value="2">
+                            2<br><input type="radio" name="answer" value="2"><br>
                             Disagree</li>
                         <li>
-                            <input type="radio" name="answer" value="3">
+                            3<br><input type="radio" name="answer" value="3"><br>
                             Neutral</li>
                         <li>
-                            <input type="radio" name="answer" value="4">
+                            4<br><input type="radio" name="answer" value="4"><br>
                             Agree</li>
                         <li>
-                            <input type="radio" name="answer" value="5">
+                            5<br><input type="radio" name="answer" value="5"><br>
                             Strongly Agree</li>
-                    </ol>
-                    <input type="submit" value="Submit" name="submit"/>
+                    </ul><br><br><br><br><br><br>
+                    <input id="submit" type="submit" value="Submit" name="submit"/>
                 </form>
+                <p class="hidden">Prediction: {{ prediction }}</p>
                 <button type="button" id="show_prediction">Show Prediction</button>
-                <p id="prediction" class="hide">Prediction: {{ prediction }}</p>
                 {% endif %}
-            {% else %}
-            <p>Please log in to answer questions</p>
-            {% endif %}
+                {% else %}
+                <p>Please log in to answer questions</p>
+                {% endif %}
+            </div>
     </main>
 {% endblock %}
