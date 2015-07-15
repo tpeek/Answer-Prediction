@@ -208,7 +208,6 @@ def question(request):
                     prediction = guess(x, u, y)
                 else:
                     prediction = None
-                print prediction
             else:
                 return {"question": None, "prediction": None}
             return {"question": question, "prediction": prediction}
