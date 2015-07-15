@@ -1,6 +1,6 @@
 {% extends "base.jinja2" %}
 {% block section %}
-<main>
+<main id="login">
   {% if error -%}
   <p class="error"><strong>Error</strong>: {{ error }}</p>
   {%- endif %}
@@ -14,8 +14,7 @@
         <input type="password" name="password" id="password"/>
     </div>
     <div class="control_row">
-        <input type="submit" name="Login" value="Login"/><br><br><br>
-        <a href="{{ request.route_url('new_account') }}">New User</a>
+        <input type="submit" name="Login" value="Login"/>
     </div>
 </form>
 </main>
