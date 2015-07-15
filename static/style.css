@@ -12,6 +12,11 @@ h1 {
   font-size: 25px;
 }
 
+#choices {
+  color: green;
+}
+
+
 #entries li {
   text-align: left;
 }
