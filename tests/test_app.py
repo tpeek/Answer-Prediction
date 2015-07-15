@@ -25,7 +25,7 @@ import app
 
 # Fixture 1
 # create session connection
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def connection(request):
     engine = create_engine(TEST_DATABASE_URL)
     app.Base.metadata.create_all(engine)
@@ -72,8 +72,8 @@ def test_create_user(db_session):
 # submission of answer
 def test_provide_answer(db_session):
     kwargs = {
-        'question_id': '5',
-        'user_id': '14',
+        'question_id': '1',
+        'user_id': '2',
         'answer': '3'
     }
     submission = app.Submission(**kwargs)
@@ -83,8 +83,8 @@ def test_provide_answer(db_session):
         app.Submission.id == submission.id
     ).one()
     assert getattr(s, 'id', '') is not None
-    assert getattr(s, 'question_id', '') is '5'
-    assert getattr(s, 'user_id', '') is '14'
+    assert getattr(s, 'question_id', '') is '1'
+    assert getattr(s, 'user_id', '') is '2'
     assert getattr(s, 'answer', '') is '3'
 
 
@@ -112,7 +112,7 @@ def test_create_user_failure(db_session):
 
 # Fixture 3
 # create webtest app
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def testapp():
     from webtest import TestApp
     app_ = app.app()
@@ -120,8 +120,34 @@ def testapp():
 
 
 # Fixture 4
-# fixture to create new user
-@pytest.fixture()
+# fixture to create new question
+@pytest.fixture(scope="function")
+def new_question(db_session):
+    kwargs = {
+        'text': "1?",
+    }
+    kwargs['session'] = db_session
+    question = app.Question.new(**kwargs)
+    db_session.flush()
+    return question
+
+
+# Fixture 5
+# fixture to create 2nd question
+@pytest.fixture(scope="function")
+def new_question2(db_session):
+    kwargs = {
+        'text': "2?",
+    }
+    kwargs['session'] = db_session
+    question = app.Question.new(**kwargs)
+    db_session.flush()
+    return question
+
+
+# Fixture 6
+# fixture to create user
+@pytest.fixture(scope="function")
 def new_user(db_session):
     kwargs = {
         'username': "Test_Username",
@@ -134,48 +160,120 @@ def new_user(db_session):
     return user
 
 
-# Fixture 5
-# fixture to create new answer submission
-"""@pytest.fixture()
-def new_submission(db_session):
+# Fixture 7
+# fixture to create 2nd user
+@pytest.fixture(scope="function")
+def new_user2(db_session):
     kwargs = {
-        'question_id': 5,
-        'user_id': 14,
-        'answer': 3
+        'username': "Test_Username2",
+        'password': "testpassword2"
+        # 'password2': "testpassword"
+    }
+    kwargs['session'] = db_session
+    user = app.User.new(**kwargs)
+    db_session.flush()
+    return user
+
+
+# Fixture 8
+# fixture to create new answer submission
+@pytest.fixture(scope="function")
+def new_submission(db_session, new_question, new_user2):
+    kwargs = {
+        'question_id': new_question.id,
+        'user_id': new_user2.id,
+        'answer': '3'
     }
     submission = app.Submission(**kwargs)
     db_session.add(submission)
     db_session.flush()
-    return submission"""
+    return submission
+
+
+# Fixture 9
+# fixture to create second answer submission
+@pytest.fixture(scope="function")
+def new_submission2(db_session, new_question2, new_user2):
+    kwargs = {
+        'question_id': new_question2.id,
+        'user_id': new_user2.id,
+        'answer': '3'
+    }
+    submission = app.Submission(**kwargs)
+    db_session.add(submission)
+    db_session.flush()
+    return submission
+
+
+# Fixture 10
+# fixture to create authentication
+@pytest.fixture(scope="function")
+def auth_req(request):
+    manager = BCRYPTPasswordManager()
+    settings = {
+        'auth.username': 'Test_Username',
+        'auth.password': manager.encode('testpassword'),
+    }
+    testing.setUp(settings=settings)
+    req = testing.DummyRequest()
+
+    def cleanup():
+        testing.tearDown()
+
+    request.addfinalizer(cleanup)
+
+    return req
+
+
+# Fixture 11
+# fixture to create suite
+@pytest.fixture(scope="function")
+def suite(
+    testapp,
+    new_user,
+    new_user2,
+    new_question,
+    new_question2,
+    new_submission,
+    new_submission2,
+    auth_req
+):
+    return {
+        'testapp': testapp,
+        'new_user': new_user,
+        'new_user2': new_user2,
+        'new_question': new_question,
+        'new_question2': new_question2,
+        'new_submission': new_submission,
+        'new_submission2': new_submission2,
+        'auth_req': auth_req
+    }
 
 
 # Test 5
-# getting homepage with a user in the database ready to be used
-def test_homepage(testapp, new_user):
-    response = testapp.get('/')
+# getting homepage
+def test_homepage(suite):
+    response = suite['testapp'].get('/')
     assert response.status_code == 200
-    assert getattr(new_user, 'username', '') == "Test_Username"
-    manager = BCRYPTPasswordManager()
-    assert manager.check(getattr(new_user, 'password', ''), "testpassword")
-    # assert getattr(new_user, 'password2', '') == "testpassword"
+    assert "<main id=home>" in response.body
 
 
 # Test 6
 # try to create a username that already exists
-def test_username_already_exists(testapp, new_user):
+def test_username_already_exists(suite):
     params = {
         'username': "Test_Username",
         'password': "testpassword"
         # 'password2': "testpassword"
     }
-    response = testapp.post('/new_account', params=params, status='2*')
+    response = suite['testapp'].post('/new_account', params=params, status='2*')
     assert "<strong>Error</strong>" in response.body
 
 
 # Test 7
 # getting the question page from an unauthenticated hacker
-def test_get_question_view_unauth(testapp):
-    response = testapp.get('/question', status='3*')
+def test_get_question_view_unauth(suite):
+    response = suite['testapp'].get('/question', status='3*')
     assert response.status_code == 302  # redirect out
     redirected = response.follow()
     assert "<main id=home>" in redirected.body
@@ -183,13 +281,13 @@ def test_get_question_view_unauth(testapp):
 
 # Test 8
 # posting a submission from an unauthenticated hacker
-def test_post_to_question_view_unauth(testapp):
+def test_post_to_question_view_unauth(suite):
     params = {
         'question_id': '5',
         'user_id': '14',
         'answer': '3'
     }
-    response = testapp.post('/question', params=params, status='3*')
+    response = suite['testapp'].post('/question', params=params, status='3*')
     assert response.status_code == 302  # redirect out
     redirected = response.follow()
     assert "<main id=home>" in redirected.body
@@ -197,38 +295,56 @@ def test_post_to_question_view_unauth(testapp):
 
 # Test 9
 # login with 'new_user' credentials
-def test_login_success(testapp, new_user):
+def test_login_success(suite):
     params = {
-        'username': "Test_Username",
-        'password': "testpassword"
+        'username': 'Test_Username',
+        'password': 'testpassword'
     }
-    response = testapp.post('/login', params=params, status='3*')
+    suite['auth_req'].params = params
+
+    assert app.login(suite['auth_req'])
+
+    response = suite['testapp'].post('/login', params=params, status='3*')
     assert response.status_code == 302
     redirected = response.follow()
     assert "<main id=home>" in redirected.body
 
 
+# Test 9.5
+#
+def test_login_bad_pass(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'oops'
+    }
+    suite['auth_req'].params = params
+    assert not app.login(suite['auth_req'])
+
+
 # Test 10
-# trying to submit without params
-def test_submit_with_no_params(testapp, new_user):
-    test_login_success(testapp, new_user)
-    response = testapp.post('/question', params={}, status='2*')
+# trying to submit without answer
+def test_submit_with_no_answer(suite):
+    test_login_success(suite)
+    params = {
+        'question_id': suite['new_question'].id
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
     assert 'class="question_form"' in response.body   # allow user to skip
 
 
 # Test 11
-# trying to submit with params
-def test_submit_with_params(testapp, new_user):
-    test_login_success(testapp, new_user)
+# trying to submit with answer
+def test_submit_with_answer(suite):
+    test_login_success(suite)
     params = {
-        'question_id': '10',
+        'question_id': suite['new_question'].id,
         'answer': '2'
     }
-    response = testapp.post('/question', params=params, status='2*')
+    response = suite['testapp'].post('/question', params=params, status='2*')
     assert 'class="question_form"' in response.body
 
 
-# Fixture 6
+# Fixture 11.5
 # fixture to create authentication
 """@pytest.fixture(scope='function')
 def auth_req(request):
@@ -249,13 +365,7 @@ def auth_req(request):
     return req"""
 
 
-"""def test_login_bad_pass(auth_req):
-    from journal import login
-    auth_req.params = {'username': 'admin', 'password': 'wrong'}
-    assert not ogin(auth_req)
-
-
-def test_login_bad_user(auth_req):
+"""def test_login_bad_user(auth_req):
     from journal import login
     auth_req.params = {'username': 'bad', 'password': 'secret'}
     assert not login(auth_req)
