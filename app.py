@@ -20,7 +20,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
 # server imports
 from waitress import serve
-from recaptcha.client import captcha
+# from recaptcha.client import captcha
 
 import numpy as np
 
