@@ -28,8 +28,8 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
     #'postgresql://wesleywooten@localhost:5432/AP_test'
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
-    # 'postgresql://power_user:nopassword@localhost:5432/test1'
+    #'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
+     'postgresql://power_user:nopassword@localhost:5432/test1'
 )
 Base = declarative_base()
 
