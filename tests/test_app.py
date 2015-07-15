@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import os
 import pytest
+from pyramid import testing
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from cryptacular.bcrypt import BCRYPTPasswordManager
@@ -162,12 +163,12 @@ def test_homepage(testapp, new_user):
 # Test 6
 # try to create a username that already exists
 def test_username_already_exists(testapp, new_user):
-    kwargs = {
+    params = {
         'username': "Test_Username",
         'password': "testpassword"
         # 'password2': "testpassword"
     }
-    response = testapp.post('/new_account', params=kwargs, status='2*')
+    response = testapp.post('/new_account', params=params, status='2*')
     assert "<strong>Error</strong>" in response.body
 
 
@@ -195,26 +196,45 @@ def test_post_to_question_view_unauth(testapp):
 
 
 # Test 9
-# trying to submit without params
-"""def test_submit_with_no_params(testapp):
-    test_login_success(testapp)
-    response = testapp.post('/question', status=500)
-    assert 'IntegrityError' in response.body"""
+# login with 'new_user' credentials
+def test_login_success(testapp, new_user):
+    params = {
+        'username': "Test_Username",
+        'password': "testpassword"
+    }
+    response = testapp.post('/login', params=params, status='3*')
+    assert response.status_code == 302
+    redirected = response.follow()
+    assert "<main id=home>" in redirected.body
 
 
 # Test 10
 # trying to submit without params
-"""def test_submit_with_params(testapp):
-    test_login_success(testapp)
-    response = testapp.post('/question', status=200)"""
+def test_submit_with_no_params(testapp, new_user):
+    test_login_success(testapp, new_user)
+    response = testapp.post('/question', params={}, status='2*')
+    assert 'class="question_form"' in response.body   # allow user to skip
 
 
-"""
-@pytest.fixture(scope='function')
+# Test 11
+# trying to submit with params
+def test_submit_with_params(testapp, new_user):
+    test_login_success(testapp, new_user)
+    params = {
+        'question_id': '10',
+        'answer': '2'
+    }
+    response = testapp.post('/question', params=params, status='2*')
+    assert 'class="question_form"' in response.body
+
+
+# Fixture 6
+# fixture to create authentication
+"""@pytest.fixture(scope='function')
 def auth_req(request):
     manager = BCRYPTPasswordManager()
     settings = {
-        'auth.username': 'admin',
+        'auth.username': 'user1',
         'auth.password': manager.encode('secret'),
 
     }
@@ -226,16 +246,10 @@ def auth_req(request):
 
     request.addfinalizer(cleanup)
 
-    return req
-
-def test_login_success(auth_req):
-    from app import login
-    auth_req.params = {'username': 'admin', 'password': 'secret'}
-    assert login(auth_req)
+    return req"""
 
 
-
-def test_login_bad_pass(auth_req):
+"""def test_login_bad_pass(auth_req):
     from journal import login
     auth_req.params = {'username': 'admin', 'password': 'wrong'}
     assert not ogin(auth_req)
