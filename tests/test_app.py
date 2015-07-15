@@ -11,7 +11,8 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
+    # 'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
+    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
@@ -208,7 +209,7 @@ def test_post_to_question_view_unauth(testapp):
     response = testapp.post('/question', status=200)"""
 
 
-
+"""
 @pytest.fixture(scope='function')
 def auth_req(request):
     manager = BCRYPTPasswordManager()
@@ -254,7 +255,7 @@ def test_login_missing_params(auth_req):
             login(auth_req)
 
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
-
+"""
 
 # def login(username, password, testapp):
 #     """encapsulate app login for reuse in tests
@@ -264,7 +265,7 @@ INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
 #     login_data = {'username': username, 'password': password}
 #     return app.post('/login', params=login_data, status='*')
 
-
+"""
 def test_start_as_anonymous(testapp):
     response = app.get('/', status=200)
     actual = response.body
@@ -298,4 +299,4 @@ def test_logout(testapp):
     actual = response.body
     assert INPUT_BTN not in actual
 
-
+"""
