@@ -1,21 +1,41 @@
-h1 {
+#logo {
   text-align: center;
-  color: #0000ff;
-  background-color: #00ff00;
-  font-size: 60px;
+  font-family: 'Tangerine', sans-serif;
+  font-size: 100px;
+  font-weight: 100;
+  margin: auto;
+  color: Navy;
 }
 
 #menu li {
   display: inline-block;
+  margin: 2px;
   text-align: left;
   color: #ff0000;
   font-size: 25px;
+  color: inherit;
+  border-top: 1px solid #0060B6;
+  border-bottom: 1px solid #0060B6;
 }
 
-#choices {
-  color: green;
+#choices li {
+  margin: 20px;
+  float: left;
+  list-style: none;
+  text-align: center;
 }
 
+#questions {
+  margin: auto;
+  width: 85%;
+  border:3px solid silver;
+  padding: 10px;
+  text-align: center;
+}
+
+#q_text {
+  text-align: left;
+}
 
 #entries li {
   text-align: left;
