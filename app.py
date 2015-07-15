@@ -239,15 +239,10 @@ def make_data(question, user):
 
 def _select_users(u, questions, user):
     users = u[0]
-    if user in users:
-        users.remove(user)
-    for i, item in reversed(list(enumerate(u))):
-        if len(item) >= 10:
+    for item in u:
             users = list(
                 set(users) & set(item)
             )
-        else:
-            del questions[i]
     return users
 
 
