@@ -22,6 +22,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from waitress import serve
 
 import numpy as np
+#from recaptcha import captcha
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
