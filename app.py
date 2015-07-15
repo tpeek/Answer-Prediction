@@ -34,23 +34,6 @@ DATABASE_URL = os.environ.get(
 Base = declarative_base()
 
 
-#skeleteon fo captcha
-def captcha():
-    if req.method == 'POST':
-        response = captcha.submit(
-            req.args['recaptcha_challenge_field'],
-            req.args['recaptcha_response_field'],
-            self.private_key,
-            req.remote_addr,
-            )
-        if not response.is_valid:
-            say_captcha_is_invalid()
-        else:
-            do_something_useful()
-    else:
-        data['recaptcha_javascript'] = captcha.displayhtml(self.public_key)
-        data['recaptcha_theme'] = self.theme
-        return 'recaptchaticket.html', data, n
 # -Models-
 class User(Base):
     __tablename__ = 'users'
@@ -208,7 +191,7 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            if answer is not None:
+            if answer is not None and question.id not in Submission.get_all_for_user(user):
                 Submission.new(
                     user=user,
                     question=question,
@@ -224,7 +207,7 @@ def question(request):
             if l:
                 question = l[randint(0, len(l) - 1)]
                 x, u, y = make_data(question, user)
-                if not x == []:
+                if x != [] and y != []:
                     prediction = guess(x, u, y)
                 else:
                     prediction = None
@@ -245,17 +228,26 @@ def faq(request):
 def make_data(question, user):
     """Gets data from the database and parses it for the Guess function"""
     questions, u = _get_data(user, question)
-    users = u[0]
-    for item in u:  # Get rid of users that havent answered EVERY question...
-        users = list(
-            set(users) & set(item)
-        )
+    users = _select_users(u, questions, user)
     x = _parse_into_matrix(questions, users)
     y = []
     for user in users:
         y.append(Submission.get_answer(user, question))
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
     return x, u, y
+
+
+def _select_users(u, questions, user):
+    users = u[0]
+    users.remove(user)
+    for i, item in reversed(list(enumerate(u))):
+        if len(item) >= 10:
+            users = list(
+                set(users) & set(item)
+            )
+        else:
+            del questions[i]
+    return users
 
 
 def _get_data(user, question):
