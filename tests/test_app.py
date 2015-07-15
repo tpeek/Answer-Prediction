@@ -11,7 +11,7 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
+    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
@@ -206,3 +206,96 @@ def test_post_to_question_view_unauth(testapp):
 """def test_submit_with_params(testapp):
     test_login_success(testapp)
     response = testapp.post('/question', status=200)"""
+
+
+
+@pytest.fixture(scope='function')
+def auth_req(request):
+    manager = BCRYPTPasswordManager()
+    settings = {
+        'auth.username': 'admin',
+        'auth.password': manager.encode('secret'),
+
+    }
+    testing.setUp(settings=settings)
+    req = testing.DummyRequest()
+
+    def cleanup():
+        testing.tearDown()
+
+    request.addfinalizer(cleanup)
+
+    return req
+
+def test_login_success(auth_req):
+    from app import login
+    auth_req.params = {'username': 'admin', 'password': 'secret'}
+    assert login(auth_req)
+
+
+
+def test_login_bad_pass(auth_req):
+    from journal import login
+    auth_req.params = {'username': 'admin', 'password': 'wrong'}
+    assert not ogin(auth_req)
+
+
+def test_login_bad_user(auth_req):
+    from journal import login
+    auth_req.params = {'username': 'bad', 'password': 'secret'}
+    assert not login(auth_req)
+
+
+def test_login_missing_params(auth_req):
+    from journal import login
+    for params in ({'username': 'admin'}, {'password': 'secret'}):
+        auth_req.params = params
+        with pytest.raises(ValueError):
+            login(auth_req)
+
+INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
+
+
+# def login(username, password, testapp):
+#     """encapsulate app login for reuse in tests
+
+#     Accept all status codes so that we can make assertions in tests
+#     """
+#     login_data = {'username': username, 'password': password}
+#     return app.post('/login', params=login_data, status='*')
+
+
+def test_start_as_anonymous(testapp):
+    response = app.get('/', status=200)
+    actual = response.body
+    assert INPUT_BTN not in actual
+
+
+def test_login_success(app):
+    username, password = ('admin', 'secret')
+    redirect = login(username, password, testapp)
+    assert redirect.status_code == 302
+    response = redirect.follow()
+    assert response.status_code == 200
+    actual = response.body
+    assert INPUT_BTN in actual
+
+
+def test_login_fails(testapp):
+    username, password = ('admin', 'wrong')
+    response = login(username, password, testapp)
+    assert response.status_code == 200
+    actual = response.body
+    assert "Login Failed" in actual
+    assert INPUT_BTN not in actual
+
+def test_logout(testapp):
+    # re-use existing code to ensure we are logged in when we begin
+    test_login_success(testapp)
+    redirect = testapp.get('/logout', status="3*")
+    response = redirect.follow()
+    assert response.status_code == 200
+    actual = response.body
+    assert INPUT_BTN not in actual
+
+
