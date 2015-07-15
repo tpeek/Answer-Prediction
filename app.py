@@ -226,13 +226,14 @@ def faq(request):
 
 
 def make_data(question, user):
-    questions, x, u = _get_data(user)
+    """Gets data from the database and parses it for the Guess function"""
+    questions, u = _get_data(user, question)
     users = u[0]
-    for item in u:
+    for item in u:  # Get rid of users that havent answered EVERY question...
         users = list(
             set(users) & set(item)
         )
-    x = _parse_into_matrix(x, questions, users)
+    x = _parse_into_matrix(questions, users)
     y = []
     for user in users:
         y.append(Submission.get_answer(user, question))
@@ -240,14 +241,14 @@ def make_data(question, user):
     return x, u, y
 
 
-def _get_data(user):
-    x, users = [], []
+def _get_data(user, question):
+    """Queries database for all the questions the user has answered
+    then queries for all the users that have answered all those
+    questions plus the question that the user is currently answering"""
+    users = []
     questions = [Question.get_question_by_id(sub.question_id)
                  for sub in Submission.get_all_for_user(user)
                  ]
-
-    for q in questions:
-        x.append([])
 
     questions.append(question)
 
@@ -255,11 +256,14 @@ def _get_data(user):
         users.append([User.get_by_id(sub.user_id)
                       for sub in Submission.get_all_for_question(q)
                       ])
-    return questions, x, users
+    return questions, users
 
 
-def _parse_into_matrix(x, questions, users):
-    """"""
+def _parse_into_matrix(questions, users):
+    """Sets matrix x to have a column for each question the
+    user has answered, and fills each column with answers that
+    the users have answered in the same order for each column"""
+    x = [[] for q in range(len(questions) - 1)]
     for i, slot in enumerate(x):
         for user in users:
             slot.append(Submission.get_answer(user, questions[i]))
