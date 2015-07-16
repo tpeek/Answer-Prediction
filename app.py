@@ -212,7 +212,9 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            if answer is not None and question.id not in Submission.get_all_for_user(user):
+            if answer is not None and question.id not in [sub.question_id
+                                                          for sub in
+                                                          Submission.get_all_for_user(user)]:
                 Submission.new(
                     user=user,
                     question=question,
@@ -231,12 +233,9 @@ def question(request):
                 if x != [] and y != []:
                     prediction = guess(x, u, y)
                 else:
-                    prediction = None
-            else:
-                return {"question": None, "prediction": None}
-            return {"question": question, "prediction": prediction}
-        else:
-            return {"question": None, "prediction": None}
+                    prediction = "Not enough data to predict this question. Keep going!"
+                return {"question": question, "prediction": prediction}
+        return {"question": None, "prediction": None}
     else:
         return HTTPFound(request.route_url('home'))
 
@@ -248,23 +247,33 @@ def faq(request):
 
 def make_data(question, user):
     """Gets data from the database and parses it for the Guess function"""
-    questions, u = _get_data(user, question)
-    users = _select_users(u, questions, user)
+    u, questions = _get_data(user, question)
+    users, questions = _select_users(u, questions)
     x = _parse_into_matrix(questions, users)
     y = []
-    for user in users:
-        y.append(Submission.get_answer(user, question))
+    for user_ in users:
+        print user_.username, question.text
+        y.append(Submission.get_answer(user_, question))
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
     return x, u, y
 
 
-def _select_users(u, questions, user):
-    users = u[0]
-    for item in u:
+def _select_users(u, questions):
+    _u = [u.pop()]
+    _q = []
+    while u:
+        item = u.pop()
+        qu = questions.pop()
+        if len(item) >= 10:
+            _u.append(item)
+            _q.append(qu)
+
+    users = _u[0]
+    for item in _u:
             users = list(
                 set(users) & set(item)
             )
-    return users
+    return users, _q
 
 
 def _get_data(user, question):
@@ -276,20 +285,21 @@ def _get_data(user, question):
                  for sub in Submission.get_all_for_user(user)
                  ]
 
-    questions.append(question)
-
     for q in questions:
         users.append([User.get_by_id(sub.user_id)
                       for sub in Submission.get_all_for_question(q)
                       ])
-    return questions, users
+    users.append([User.get_by_id(sub.user_id)
+                  for sub in Submission.get_all_for_question(question)
+                  ])
+    return users, questions
 
 
 def _parse_into_matrix(questions, users):
     """Sets matrix x to have a column for each question the
     user has answered, and fills each column with answers that
     the users have answered in the same order for each column"""
-    x = [[] for q in range(len(questions) - 1)]
+    x = [[] for q in range(len(questions))]
     for i, slot in enumerate(x):
         for user in users:
             slot.append(Submission.get_answer(user, questions[i]))
@@ -300,7 +310,7 @@ def guess(every_answer, user_answers, cur_question):
     n = len(every_answer[0])
     for each in every_answer:
         if len(each) != n:
-            raise ValueError("Every list must be of the same length, asshole.")
+            raise Exception("Every list must be of the same length, asshole.")
     every_answer.append(np.ones(n))
     A = np.vstack(every_answer).T
     every_x = np.linalg.lstsq(A, cur_question)[0]
