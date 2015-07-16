@@ -22,6 +22,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from waitress import serve
 
 import numpy as np
+import urllib
+import urllib2
+from urllib2 import HTTPError
+import json
 #from recaptcha import captcha
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -143,15 +147,34 @@ def login_page(request):
 def new_account_page(request):
     error = ""
     if request.method == "POST":
+        '''try:
+            params = {
+                'secret': '6Lfq1gkTAAAAADReh88NQ4TggHTEnLEONl1oCcn_',
+                'response': request.params.get('g-recaptcha-response')
+            }
+            data = urllib.urlencode(params)
+            response = urllib2.Request(
+                url='http://www.google.com/recaptcha/api/siteverify',
+                data=data
+            )
+            f = urllib2.urlopen(response)
+            body = f.read()
+            api_data = json.loads(body)
+            if api_data['success'] == 'true':'''
         try:
             username = request.params.get('username', None)
             passsword = request.params.get('password', None)
             User.new(username, passsword)
             headers = remember(request, username)
+            print request.params.get('g-recaptcha-response')
             return HTTPFound(request.route_url('home'), headers=headers)
         except Exception as e:
             error = e
             return {'error': error}
+            '''else:
+        return {'error': body}
+        except Exception as e:
+            return {'error': e}'''
     return {'error': error}
 
 
