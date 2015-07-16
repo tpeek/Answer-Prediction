@@ -14,6 +14,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 # sqlalchemy imports
 import sqlalchemy as sa
+from pyramid.response import Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -212,9 +213,9 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            if answer is not None and question.id not in [sub.question_id
-                                                          for sub in
-                                                          Submission.get_all_for_user(user)]:
+            if answer not in [None, ''] and question.id not in [sub.question_id
+                                                                for sub in
+                                                                Submission.get_all_for_user(user)]:
                 Submission.new(
                     user=user,
                     question=question,
@@ -234,6 +235,12 @@ def question(request):
                     prediction = int(round(guess(x, u, y)))
                 else:
                     prediction = "Not enough data to predict this question. Keep going!"
+                if 'HTTP_X_REQUESTED_WITH' in request.environ and request.method == "POST":
+                    return Response(body=json.dumps({
+                                                    "text": question.text,
+                                                    "qid": question.id,
+                                                    "prediction": prediction
+                                                    }), content_type=b'application/json')
                 return {"question": question, "prediction": prediction}
         return {"question": None, "prediction": None}
     else:
@@ -272,7 +279,7 @@ def _select_users(u, questions):
             users = list(
                 set(users) & set(item)
             )
-    return users, _q
+    return users, _q[::-1]
 
 
 def _get_data(user, question):
