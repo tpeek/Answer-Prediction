@@ -5,7 +5,7 @@
             {% if question is none %}
                 <p>There are no questions</p>
             {% else %}
-
+            <link href="/static/responsive.css" rel="stylesheet" media="screen">
             <div id="questions">
                 <p id="q_text">{{ question.text }}</p>
                 <form action="{{ request.route_url('question') }}"

@@ -39,7 +39,7 @@ if __name__ == '__main__':
         with open(sys.argv[-1]) as questions:
             for q in questions.read().split("\n"):
                 q = unicode(q)
-                if not sess.query(Question).filter(Question.text == q).one():
+                if not sess.query(Question).filter(Question.text == q).all():
                     Question.new(q, sess)
                     print "Added ", q
                 else:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             if inp in ["new", "n"]:
                     q = unicode(raw_input("Enter Question Text:\n>"))
                     if not sess.query(Question).filter(
-                            Question.text == q).one():
+                            Question.text == q).all():
                         Question.new(q, sess)
                     else:
                         print "Question Must Be Unique"
