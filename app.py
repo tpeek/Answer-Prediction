@@ -113,7 +113,7 @@ class Submission(Base):
 
     @classmethod
     def get_answer(cls, user, question, session=DBSession):
-        print user.name, ":", user.id
+        print user.username, ":", user.id
         print question.text, ":", question.id
         return session.query(cls).filter(
             cls.user_id == user.id).filter(cls.question_id == question.id
