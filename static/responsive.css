@@ -1,3 +1,7 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+
+
+
 /*<meta name="viewport" content="width=device-width, initial-scale=1" />
 */
 /*
@@ -17,9 +21,9 @@
 }
 
 /*@media (max-width: 480px) {
-	body {
-		background: black;
-	}
+  body {
+    background: black;
+  }
 */
 
 @media (max-width: 480px) {
@@ -160,3 +164,4 @@ img {
    color: #666;
    width: 100%;
 }*/
+
