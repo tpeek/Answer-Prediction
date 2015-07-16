@@ -4,7 +4,7 @@
   {% if error -%}
   <p class="error"><strong>Error</strong>: {{ error }}</p>
   {%- endif %}
-     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+     <script src="https://www.google.com/recaptcha/api.js" ></script>
   <form action="{{ request.route_url('new_account') }}" method="POST">
       <div class="field">
         <label for="username">Username</label>
