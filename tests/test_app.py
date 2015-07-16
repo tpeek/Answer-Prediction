@@ -255,19 +255,21 @@ def suite(
 def test_homepage(suite):
     response = suite['testapp'].get('/')
     assert response.status_code == 200
-    assert "<main id=home>" in response.body
+    assert '<main id="home">' in response.body
 
 
 # Test 6
-# try to create a username that already exists
-def test_username_already_exists(suite):
-    params = {
+# unit test trying to create a username that already exists
+def test_username_already_exists(db_session, suite):
+    kwargs = {
         'username': "Test_Username",
         'password': "testpassword"
         # 'password2': "testpassword"
     }
-    response = suite['testapp'].post('/new_account', params=params, status='2*')
-    assert "<strong>Error</strong>" in response.body
+    user = app.User(**kwargs)
+    db_session.add(user)
+    with pytest.raises(IntegrityError):
+        db_session.flush()
 
 
 # Test 7
@@ -276,7 +278,7 @@ def test_get_question_view_unauth(suite):
     response = suite['testapp'].get('/question', status='3*')
     assert response.status_code == 302  # redirect out
     redirected = response.follow()
-    assert "<main id=home>" in redirected.body
+    assert '<main id="home">' in redirected.body
 
 
 # Test 8
@@ -290,7 +292,7 @@ def test_post_to_question_view_unauth(suite):
     response = suite['testapp'].post('/question', params=params, status='3*')
     assert response.status_code == 302  # redirect out
     redirected = response.follow()
-    assert "<main id=home>" in redirected.body
+    assert '<main id="home">' in redirected.body
 
 
 # Test 9
@@ -307,7 +309,7 @@ def test_login_success(suite):
     response = suite['testapp'].post('/login', params=params, status='3*')
     assert response.status_code == 302
     redirected = response.follow()
-    assert "<main id=home>" in redirected.body
+    assert '<main id="home">' in redirected.body
 
 
 # Test 9.5
