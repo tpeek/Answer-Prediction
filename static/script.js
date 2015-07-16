@@ -49,4 +49,31 @@ $(function(){
             alert("Something went wrong")
         });
     });
+
+    /*---- LOGIN PAGE AJAX ----*/
+    $("body").on("submit", "#login_form", function(event){
+        event.preventDefault();
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+        $.ajax({
+            method : "POST",
+            url : "/login",
+            data : {
+                "username" : username,
+                "password" : password
+            }
+        }).done(function(response){
+            $("header").replaceWith($($.parseHTML(response)).filter("header"));
+            $("main").replaceWith($($.parseHTML(response)).filter("main"));
+            $("#username").val(username);
+        }).fail(function(response){
+            alert("Something went wrong")
+        })
+
+    });
+
+
+
+
 });
