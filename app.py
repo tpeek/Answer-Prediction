@@ -173,7 +173,7 @@ def new_account_page(request):
                     error = e
                     return {'error': error}
             else:
-                return {}
+                return {'error': 'Are you a human?'}
         except Exception as e:
             return {'error': e}
     return {'error': error}
