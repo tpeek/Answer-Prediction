@@ -24,9 +24,8 @@ from waitress import serve
 import numpy as np
 import urllib
 import urllib2
-from urllib2 import HTTPError
 import json
-#from recaptcha import captcha
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -164,19 +163,20 @@ def new_account_page(request):
                 try:
                     username = request.params.get('username', None)
                     passsword = request.params.get('password', None)
+                    confirm = request.params.get('confirm', None)
+                    if confirm != passsword:
+                        raise ValueError("Confirmation Password Did Not Match")
                     User.new(username, passsword)
                     headers = remember(request, username)
-                    print request.params.get('g-recaptcha-response')
                     return HTTPFound(request.route_url('home'), headers=headers)
                 except Exception as e:
                     error = e
                     return {'error': error}
             else:
-                return {}
+                return {'error': 'Are you a human?'}
         except Exception as e:
             return {'error': e}
     return {'error': error}
-
 
 
 def login(request):
@@ -231,7 +231,7 @@ def question(request):
                 question = l[randint(0, len(l) - 1)]
                 x, u, y = make_data(question, user)
                 if x != [] and y != []:
-                    prediction = guess(x, u, y)
+                    prediction = int(round(guess(x, u, y)))
                 else:
                     prediction = "Not enough data to predict this question. Keep going!"
                 return {"question": question, "prediction": prediction}
@@ -252,7 +252,6 @@ def make_data(question, user):
     x = _parse_into_matrix(questions, users)
     y = []
     for user_ in users:
-        print user_.username, question.text
         y.append(Submission.get_answer(user_, question))
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
     return x, u, y
