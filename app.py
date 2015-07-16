@@ -166,7 +166,6 @@ def new_account_page(request):
                     passsword = request.params.get('password', None)
                     User.new(username, passsword)
                     headers = remember(request, username)
-                    print request.params.get('g-recaptcha-response')
                     return HTTPFound(request.route_url('home'), headers=headers)
                 except Exception as e:
                     error = e
