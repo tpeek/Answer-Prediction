@@ -188,7 +188,9 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            if answer is not None and question.id not in Submission.get_all_for_user(user):
+            if answer is not None and question.id not in [sub.question_id
+                                                          for sub in
+                                                          Submission.get_all_for_user(user)]:
                 Submission.new(
                     user=user,
                     question=question,
