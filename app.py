@@ -24,9 +24,8 @@ from waitress import serve
 import numpy as np
 import urllib
 import urllib2
-from urllib2 import HTTPError
 import json
-#from recaptcha import captcha
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -164,6 +163,9 @@ def new_account_page(request):
                 try:
                     username = request.params.get('username', None)
                     passsword = request.params.get('password', None)
+                    confirm = request.params.get('confirm', None)
+                    if confirm != passsword:
+                        raise ValueError("Confirmation Password Did Not Match")
                     User.new(username, passsword)
                     headers = remember(request, username)
                     return HTTPFound(request.route_url('home'), headers=headers)
