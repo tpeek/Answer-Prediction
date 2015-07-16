@@ -11,8 +11,8 @@
 
 @media (max-width: 480px) {
   body{
-    background-image: none;
-    background-color: white;
+/*    background-image: none;*/
+/*    background-color: white;*/
   }
 }
 
@@ -61,7 +61,7 @@
     right:0;
     }
     #choices {
-      color: red;
+/*      color: red;*/
     width: 100px;
     vertical-align: middle;
     text-align: center;
@@ -91,7 +91,7 @@
       visibility: hidden;
     }
     #home {
-      color: orange;
+/*      color: orange;*/
       font-size: 110%;
     }
 }
@@ -104,7 +104,7 @@
 
 @media (max-width: 480px){
     #logo{
-      color: red;
+/*      color: red;*/
       text-align: center;
       font-size: 110%;
     }
@@ -113,13 +113,13 @@
 @media (max-width: 480px){
     #questions { 
         font-size: %220;
-        font-color: red;
+/*        font-color: red;*/
     }
 
 @media (max-width: 480px){
     #q_text { 
         font-size: %180;
-        font-color: red;
+/*        font-color: red;*/
     }
 }
 
@@ -130,7 +130,7 @@ img {
 }
 .devs {
   text-align: center;
-  color: red;
+/*  color: red;*/
   padding: 20px;
   width: 90%;
   margin: auto;
