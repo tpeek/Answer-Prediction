@@ -5,28 +5,38 @@
             {% if question is none %}
                 <p>There are no questions</p>
             {% else %}
-
+            <link href="/static/responsive.css" rel="stylesheet" media="screen">
             <div id="questions">
                 <p id="q_text">{{ question.text }}</p>
                 <form action="{{ request.route_url('question') }}"
                 method="POST" class="question_form">
                 <input id="qu" type="hidden" name="question_id" value={{ question.id }}>
                     <ul id="choices">
+                       <label>
                         <li>
                             1<br><input type="radio" name="answer" value="1"><br>
                             Strongly Disagree</li>
+                        </label>
+                        <label>
                         <li>
                             2<br><input type="radio" name="answer" value="2"><br>
                             Disagree</li>
+                            </label>
+                        <label>
                         <li>
                             3<br><input type="radio" name="answer" value="3"><br>
                             Neutral</li>
+                            </label>
+                        <label>
                         <li>
                             4<br><input type="radio" name="answer" value="4"><br>
                             Agree</li>
+                            </label>
+                        <label>
                         <li>
                             5<br><input type="radio" name="answer" value="5"><br>
                             Strongly Agree</li>
+                        </label>
                     </ul><br><br><br><br><br><br>
                     <input id="submit" type="submit" value="Submit" name="submit"/>
                 </form><br>

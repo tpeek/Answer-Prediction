@@ -55,7 +55,6 @@ def test_create_user(db_session):
     kwargs = {
         'username': "Test_Username",
         'password': "testpassword"
-        # 'password2': "testpassword"
     }
     kwargs['session'] = db_session
     user = app.User.new(**kwargs)
@@ -65,7 +64,6 @@ def test_create_user(db_session):
     assert getattr(u, 'username', '') == "Test_Username"
     manager = BCRYPTPasswordManager()
     assert manager.check(getattr(user, 'password', ''), "testpassword")
-    # assert getattr(user, 'password2', '') == "testpassword"
 
 
 # Test 2
@@ -152,7 +150,6 @@ def new_user(db_session):
     kwargs = {
         'username': "Test_Username",
         'password': "testpassword"
-        # 'password2': "testpassword"
     }
     kwargs['session'] = db_session
     user = app.User.new(**kwargs)
@@ -167,7 +164,6 @@ def new_user2(db_session):
     kwargs = {
         'username': "Test_Username2",
         'password': "testpassword2"
-        # 'password2': "testpassword"
     }
     kwargs['session'] = db_session
     user = app.User.new(**kwargs)
@@ -206,7 +202,7 @@ def new_submission2(db_session, new_question2, new_user2):
 
 
 # Fixture 10
-# fixture to create authentication
+# fixture to create authentication for first user
 @pytest.fixture(scope="function")
 def auth_req(request):
     manager = BCRYPTPasswordManager()
@@ -250,21 +246,147 @@ def suite(
     }
 
 
+LOGIN = '<li><a href="http://localhost/login">Login</a></li>'
+LOGOUT = '<li><a href="http://localhost/logout">Logout</a></li>'
+
+
 # Test 5
-# getting homepage
-def test_homepage(suite):
-    response = suite['testapp'].get('/')
-    assert response.status_code == 200
-    assert '<main id="home">' in response.body
+# login with 'new_user' credentials
+def test_login_success_unittest(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'testpassword'
+    }
+    suite['auth_req'].params = params
+
+    assert app.login(suite['auth_req'])
 
 
 # Test 6
+# login with 'new_user' credentials
+def test_login_success(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'testpassword'
+    }
+    response = suite['testapp'].post('/login', params=params, status='3*')
+    redirected = response.follow()
+
+    assert LOGOUT in redirected.body and '<main id="home">' in redirected.body
+    assert LOGIN not in redirected.body
+
+
+# Test 7
+# use wrong password
+def test_login_bad_pass_unittest(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'oops'
+    }
+    suite['auth_req'].params = params
+    assert not app.login(suite['auth_req'])
+
+
+# Test 8
+# use wrong password
+def test_login_bad_pass(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'oops'
+    }
+    response = suite['testapp'].post('/login', params=params, status='2*')
+
+    assert 'Not authenticated' in response.body
+
+
+# Test 9
+# use wrong username
+def test_login_bad_user_unittest(suite):
+    params = {
+        'username': 'whoops',
+        'password': 'testpassword'
+    }
+    suite['auth_req'].params = params
+    with pytest.raises(ValueError):    # login() raises ValueError
+        app.login(suite['auth_req'])
+
+
+# Test 10
+# use wrong username
+def test_login_bad_user(suite):
+    params = {
+        'username': 'whoops',
+        'password': 'testpassword'
+    }
+    response = suite['testapp'].post('/login', params=params, status='2*')
+
+    assert 'User does not exist' in response.body
+
+
+# Test 11
+# try logging in without all params
+def test_login_missing_params_unittest(suite):
+    params = [
+        {'username': 'Test_Username'},
+        {'password': 'testpassword'}
+    ]
+    for param in params:
+        suite['auth_req'].params = param
+        with pytest.raises(ValueError):
+            app.login(suite['auth_req'])
+
+
+# Test 12
+# try logging in without password
+def test_login_missing_password(suite):
+    params = {
+        'username': 'Test_Username'
+    }
+    response = suite['testapp'].post('/login', params=params, status='2*')
+
+    assert 'Username and password are required' in response.body
+
+
+# Test 13
+# try logging in without username
+def test_login_missing_username(suite):
+    params = {
+        'password': 'testpassword'
+    }
+    response = suite['testapp'].post('/login', params=params, status='2*')
+
+    assert 'Username and password are required' in response.body
+
+
+# Test 14
+# logout logged in user
+def test_logout(suite):
+    test_login_success(suite)
+    redirect = suite['testapp'].get('/logout', status="3*")
+    response = redirect.follow()
+    assert LOGIN in response.body and '<main id="home">' in response.body
+    assert LOGOUT not in response.body
+
+
+# Test 15
+# try to create user without completing captcha
+def test_create_user_without_captcha(suite):
+    params = {
+        'username': 'Test_Username',
+        'password': 'testpassword',
+        'confirm': 'testpassword'
+    }
+    response = suite['testapp'].post('/new_account', params=params, status='2*')
+
+    assert 'Are you a human?' in response.body
+
+
+# Test 16
 # unit test trying to create a username that already exists
 def test_username_already_exists(db_session, suite):
     kwargs = {
         'username': "Test_Username",
         'password': "testpassword"
-        # 'password2': "testpassword"
     }
     user = app.User(**kwargs)
     db_session.add(user)
@@ -272,8 +394,16 @@ def test_username_already_exists(db_session, suite):
         db_session.flush()
 
 
-# Test 7
-# getting the question page from an unauthenticated hacker
+# Test 17
+# getting homepage as anonymous
+def test_homepage_as_anon(suite):
+    response = suite['testapp'].get('/')
+    assert LOGIN in response.body and '<main id="home">' in response.body
+    assert LOGOUT not in response.body
+
+
+# Test 18
+# getting the question page from an unauthenticated user
 def test_get_question_view_unauth(suite):
     response = suite['testapp'].get('/question', status='3*')
     assert response.status_code == 302  # redirect out
@@ -281,7 +411,7 @@ def test_get_question_view_unauth(suite):
     assert '<main id="home">' in redirected.body
 
 
-# Test 8
+# Test 19
 # posting a submission from an unauthenticated hacker
 def test_post_to_question_view_unauth(suite):
     params = {
@@ -295,35 +425,7 @@ def test_post_to_question_view_unauth(suite):
     assert '<main id="home">' in redirected.body
 
 
-# Test 9
-# login with 'new_user' credentials
-def test_login_success(suite):
-    params = {
-        'username': 'Test_Username',
-        'password': 'testpassword'
-    }
-    suite['auth_req'].params = params
-
-    assert app.login(suite['auth_req'])
-
-    response = suite['testapp'].post('/login', params=params, status='3*')
-    assert response.status_code == 302
-    redirected = response.follow()
-    assert '<main id="home">' in redirected.body
-
-
-# Test 9.5
-#
-def test_login_bad_pass(suite):
-    params = {
-        'username': 'Test_Username',
-        'password': 'oops'
-    }
-    suite['auth_req'].params = params
-    assert not app.login(suite['auth_req'])
-
-
-# Test 10
+# Test 20
 # trying to submit without answer
 def test_submit_with_no_answer(suite):
     test_login_success(suite)
@@ -334,7 +436,7 @@ def test_submit_with_no_answer(suite):
     assert 'class="question_form"' in response.body   # allow user to skip
 
 
-# Test 11
+# Test 21
 # trying to submit with answer
 def test_submit_with_answer(suite):
     test_login_success(suite)
@@ -344,85 +446,3 @@ def test_submit_with_answer(suite):
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
     assert 'class="question_form"' in response.body
-
-
-# Fixture 11.5
-# fixture to create authentication
-"""@pytest.fixture(scope='function')
-def auth_req(request):
-    manager = BCRYPTPasswordManager()
-    settings = {
-        'auth.username': 'user1',
-        'auth.password': manager.encode('secret'),
-
-    }
-    testing.setUp(settings=settings)
-    req = testing.DummyRequest()
-
-    def cleanup():
-        testing.tearDown()
-
-    request.addfinalizer(cleanup)
-
-    return req"""
-
-
-"""def test_login_bad_user(auth_req):
-    from journal import login
-    auth_req.params = {'username': 'bad', 'password': 'secret'}
-    assert not login(auth_req)
-
-
-def test_login_missing_params(auth_req):
-    from journal import login
-    for params in ({'username': 'admin'}, {'password': 'secret'}):
-        auth_req.params = params
-        with pytest.raises(ValueError):
-            login(auth_req)
-
-INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
-"""
-
-# def login(username, password, testapp):
-#     """encapsulate app login for reuse in tests
-
-#     Accept all status codes so that we can make assertions in tests
-#     """
-#     login_data = {'username': username, 'password': password}
-#     return app.post('/login', params=login_data, status='*')
-
-"""
-def test_start_as_anonymous(testapp):
-    response = app.get('/', status=200)
-    actual = response.body
-    assert INPUT_BTN not in actual
-
-
-def test_login_success(app):
-    username, password = ('admin', 'secret')
-    redirect = login(username, password, testapp)
-    assert redirect.status_code == 302
-    response = redirect.follow()
-    assert response.status_code == 200
-    actual = response.body
-    assert INPUT_BTN in actual
-
-
-def test_login_fails(testapp):
-    username, password = ('admin', 'wrong')
-    response = login(username, password, testapp)
-    assert response.status_code == 200
-    actual = response.body
-    assert "Login Failed" in actual
-    assert INPUT_BTN not in actual
-
-def test_logout(testapp):
-    # re-use existing code to ensure we are logged in when we begin
-    test_login_success(testapp)
-    redirect = testapp.get('/logout', status="3*")
-    response = redirect.follow()
-    assert response.status_code == 200
-    actual = response.body
-    assert INPUT_BTN not in actual
-
-"""
