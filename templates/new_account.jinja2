@@ -4,17 +4,7 @@
   {% if error -%}
   <p class="error"><strong>Error</strong>: {{ error }}</p>
   {%- endif %}
-     <script type="text/javascript">
-      var onloadCallback = function() {
-        grecaptcha.render('html_element', {
-          'sitekey' : 'your_site_key'
-        });
-      };
-      </script>
-      <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit"
-    async defer>
-</script>
-        <script src='https://www.google.com/recaptcha/api.js'></script>
+     <script src="https://www.google.com/recaptcha/api.js" ></script>
   <form action="{{ request.route_url('new_account') }}" method="POST">
       <div class="field">
         <label for="username">Username</label>
