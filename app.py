@@ -272,7 +272,7 @@ def _select_users(u, questions):
             users = list(
                 set(users) & set(item)
             )
-    return users, _q
+    return users, _q[::-1]
 
 
 def _get_data(user, question):
