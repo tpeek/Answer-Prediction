@@ -207,7 +207,7 @@ def question(request):
                 question = l[randint(0, len(l) - 1)]
                 x, u, y = make_data(question, user)
                 if x != [] and y != []:
-                    prediction = guess(x, u, y)
+                    prediction = int(round(guess(x, u, y)))
                 else:
                     prediction = "Not enough data to predict this question. Keep going!"
                 return {"question": question, "prediction": prediction}
@@ -228,7 +228,6 @@ def make_data(question, user):
     x = _parse_into_matrix(questions, users)
     y = []
     for user_ in users:
-        print user_.username, question.text
         y.append(Submission.get_answer(user_, question))
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
     return x, u, y
