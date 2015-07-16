@@ -113,6 +113,8 @@ class Submission(Base):
 
     @classmethod
     def get_answer(cls, user, question, session=DBSession):
+        print user.name, ":", user.id
+        print question.text, ":", question.id
         return session.query(cls).filter(
             cls.user_id == user.id).filter(cls.question_id == question.id
                                            ).one().answer
@@ -207,7 +209,7 @@ def question(request):
                 if x != [] and y != []:
                     prediction = guess(x, u, y)
                 else:
-                    prediction = "Not enough data to predict yet. Keep going!"
+                    prediction = "Not enough data to predict this question. Keep going!"
                 return {"question": question, "prediction": prediction}
         return {"question": None, "prediction": None}
     else:
