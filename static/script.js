@@ -1,4 +1,4 @@
-$(function(){
+    $(function(){
     var answer = null;
     $("body").on("click", "#show_prediction", function(event){
         $("#prediction").toggle();
@@ -21,7 +21,7 @@ $(function(){
     });
 
     /*---- QUESTION PAGE AJAX ----*/
-    $("input:radio[name=answer]").click(function() {
+    $("body").on("click", "input:radio[name=answer]", function(event){
         answer = $(this).val();
     });
 
@@ -38,11 +38,11 @@ $(function(){
                 }
         }).done(function(response){
             answer = null;
-            $("#q_text").html(response.text)
-            $("#qu").val(response.qid)
-            $("#prediction").html("Prediction: "+response.prediction)
+            $("#q_text").html(response.text);
+            $("#qu").val(response.qid);
+            $("#prediction").html("Prediction: "+response.prediction);
             $("input:radio[name='answer']").each(function(){
-                $(this).prop('checked', false)
+                $(this).prop('checked', false);
             });
             $("#submit").attr('disabled', false);
         }).fail(function(){
