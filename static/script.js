@@ -40,12 +40,13 @@ $(function(){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
-            $("#prediction").val(response.prediction)
+            $("#prediction").html("updated")
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false)
             });
             $("#submit").attr('disabled', false);
         }).fail(function(){
+            answer = null;
             alert("Something went wrong")
         });
     });
