@@ -229,9 +229,10 @@ def question(request):
 
             try:
                 count = int(request.params.get("count", 0))
+                count += 1
                 if int(predict) == int(answer):
                     score += 1
-                    count += 1
+
             except:
                 pass
 
