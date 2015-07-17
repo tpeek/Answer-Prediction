@@ -42,6 +42,10 @@
     border: 3px solid teal;
 }
 
+#score_display {
+  display: none;
+}
+
   #choices li:hover {
     background: teal;
   }

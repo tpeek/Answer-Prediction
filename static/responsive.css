@@ -50,6 +50,10 @@
     display: none;
   }
 
+  #score_display {
+  display: none;
+}
+
   #choices li:hover {
     background: navy;
   }
