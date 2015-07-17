@@ -14,34 +14,35 @@
                     <ul id="choices">
                        <label>
                         <li>
-                            1<br><input type="radio" name="answer" value="1"><br>
+                            1<br><input type="radio" name="answer" value="1">
                             Strongly Disagree</li>
                         </label>
                         <label>
                         <li>
-                            2<br><input type="radio" name="answer" value="2"><br>
+                            2<br><input type="radio" name="answer" value="2">
                             Disagree</li>
                             </label>
                         <label>
                         <li>
-                            3<br><input type="radio" name="answer" value="3"><br>
+                            3<br><input type="radio" name="answer" value="3">
                             Neutral</li>
                             </label>
                         <label>
                         <li>
-                            4<br><input type="radio" name="answer" value="4"><br>
+                            4<br><input type="radio" name="answer" value="4">
                             Agree</li>
                             </label>
                         <label>
                         <li>
-                            5<br><input type="radio" name="answer" value="5"><br>
+                            5<br><input type="radio" name="answer" value="5">
                             Strongly Agree</li>
                         </label>
                     </ul><br><br><br><br><br><br>
                     <input id="submit" type="submit" value="Submit" name="submit"/>
                 </form><br>
-                <button type="button" id="show_prediction">Show Prediction</button>
-                <p id="prediction" class="hide">Prediction: {{ prediction }}</p>
+                <button type="button" id="show_prediction">Predict</button>
+                <p id="score">Score: {{ score }}</p><br>
+                <p id="prediction" class="hide">Prediction: {{ prediction }}</p><br>
                 {% endif %}
             </div>
         {% else %}

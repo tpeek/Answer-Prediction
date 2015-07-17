@@ -567,11 +567,34 @@ def test_submit_big_data_get_prediction(suite, big_data):
     response = suite['testapp'].post('/question', params=params, status='2*')
     assert 'Prediction: 4' in response.body
 
-#test 25
-def test_no_questions(suite):
-    assert 1 == 1
-    pass
 
+# Test 24
+#
+def test_no_questions(suite):
+    test_login_success(suite)
+    params = {
+        'question_id': big_data['new_questions'][65].id,  # out of questions
+        'answer': '4'
+    }
+    assert 'There are no questions'
+
+
+# Test 25
+#
+def test_user_answers_question_frist_time(suite, big_data):
+    test_login_success(suite)
+    params = {
+        'question_id': suite['new_question'].id,  # question has one submission
+        'answer': '1'
+    }
+    response = suite['testapp'].post('/question', params=params, status='200 OK')
+    with open('aaa.html', 'w') as fh:
+        fh.write(response.body)
+    assert 'Prediction: Not enough data to predict this question. Keep going!' in response.body
+
+
+# Test 26
+#
 def test_user_answers_question_frist_time(suite):
     pass
 
@@ -644,3 +667,10 @@ def test_guess_unittest(suite, big_data):
     arg3 = [4 for i in range(98)]
 
     assert int(round(app.guess(arg1, arg2, arg3))) == prediction
+
+
+# Test 32
+# not going to work
+def test_mobile(window_size):
+    test_window_size = '400px'
+    assert 'footer_display' == None

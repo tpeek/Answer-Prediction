@@ -1,4 +1,4 @@
-$(function(){
+    $(function(){
     var answer = null;
     $("body").on("click", "#show_prediction", function(event){
         $("#prediction").toggle();
@@ -21,7 +21,7 @@ $(function(){
     });
 
     /*---- QUESTION PAGE AJAX ----*/
-    $("input:radio[name=answer]").click(function() {
+    $("body").on("click", "input:radio[name=answer]", function(event){
         answer = $(this).val();
     });
 
@@ -40,13 +40,37 @@ $(function(){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
-            $("#prediction").val(response.prediction)
+            $("#prediction").html("Prediction: "+response.prediction)
+            $('#score').html("Score: "+response.score)
             $("input:radio[name='answer']").each(function(){
-                $(this).prop('checked', false)
+                $(this).prop('checked', false);
             });
             $("#submit").attr('disabled', false);
         }).fail(function(){
+            answer = null;
             alert("Something went wrong")
         });
+    });
+
+    /*---- LOGIN PAGE AJAX ----*/
+    $("body").on("submit", "#login_form", function(event){
+        event.preventDefault();
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+        $.ajax({
+            method : "POST",
+            url : "/login",
+            data : {
+                "username" : username,
+                "password" : password
+            }
+        }).done(function(response){
+            $("header").replaceWith($($.parseHTML(response)).filter("header"));
+            $("main").replaceWith($($.parseHTML(response)).filter("main"));
+            $("#username").val(username);
+        }).fail(function(response){
+            alert("Something went wrong")
+        })
     });
 });
