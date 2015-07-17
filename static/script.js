@@ -40,7 +40,7 @@ $(function(){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
-            $("#prediction").html(response.prediction)
+            $("#prediction").html("Prediction: "+response.prediction)
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false)
             });
