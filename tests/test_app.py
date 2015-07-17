@@ -12,8 +12,8 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
-    # 'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
+    # 'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
+    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
@@ -245,8 +245,8 @@ def suite(
     }
 
 
-LOGIN = '<li><a href="http://localhost/login">Login</a></li>'
-LOGOUT = '<li><a href="http://localhost/logout">Logout</a></li>'
+LOGIN = '<a href="http://localhost/login" id="loginlink" class="navlink">'
+LOGOUT = '<a href="http://localhost/logout" id="logoutlink">'
 
 
 # Test 5
