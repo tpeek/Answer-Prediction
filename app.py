@@ -227,6 +227,8 @@ def question(request):
                 )
         questions = Question.all()
         if questions:
+            score = request.params.get("score")
+            score = "dummy"
             submissions = Submission.get_all_for_user(user)
             l = []
             for q in questions:
@@ -243,7 +245,8 @@ def question(request):
                     return Response(body=json.dumps({
                                                     "text": question.text,
                                                     "qid": question.id,
-                                                    "prediction": prediction
+                                                    "prediction": prediction,
+                                                    "score": "dummy"
                                                     }), content_type=b'application/json')
                 return {"question": question, "prediction": prediction}
         return {"question": None, "prediction": None}
@@ -321,7 +324,7 @@ def guess(every_answer, user_answers, cur_question):
     n = len(every_answer[0])
     for each in every_answer:
         if len(each) != n:
-            raise Exception("Every list must be of the same length, asshole.")
+            raise Exception("Every list must be of the same length.")
     every_answer.append(np.ones(n))
     A = np.vstack(every_answer).T
     every_x = np.linalg.lstsq(A, cur_question)[0]

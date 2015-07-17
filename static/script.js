@@ -38,9 +38,10 @@
                 }
         }).done(function(response){
             answer = null;
-            $("#q_text").html(response.text);
-            $("#qu").val(response.qid);
-            $("#prediction").html("Prediction: "+response.prediction);
+            $("#q_text").html(response.text)
+            $("#qu").val(response.qid)
+            $("#prediction").html("Prediction: "+response.prediction)
+            $('#score').html("Score: "+response.score)
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false);
             });
@@ -71,10 +72,5 @@
         }).fail(function(response){
             alert("Something went wrong")
         })
-
     });
-
-
-
-
 });
