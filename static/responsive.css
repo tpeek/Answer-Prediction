@@ -66,7 +66,7 @@
     }
     #choices {
 /*      color: red;*/
-    width: 100px;
+    width: 300px;
     vertical-align: middle;
     text-align: center;
 /*    float: right 100%;*/
@@ -77,12 +77,12 @@
     text-align: justify;
     line-height: 100%;
     padding: 6px 6px 6px 6px;
-    padding: 2em;  
+    padding: 2em;
 /*    overflow:hidden;*/
     }
     #choices li {
   background: teal;
-    border-radius:8px;   
+    border-radius:8px;
     padding:1em;
     margin:1em;
     cursor:pointer;
@@ -93,7 +93,7 @@
 }
 
 #input {
-    margin-right:1em;   
+    margin-right:1em;
     padding: 1em;
     margin: 1em;
 }
@@ -102,9 +102,9 @@
 
 
 @media (max-width: 480px){
-    #footer { 
-        display : none; 
-        visibility : hidden; 
+    #footer {
+        display : none;
+        visibility : hidden;
     }
     #chatbox{
       display: none;
@@ -117,7 +117,7 @@
 }
 
 /*@media (max-width: 480px){
-    #questions { 
+    #questions {
         display : block;
     }*/
 
@@ -131,13 +131,13 @@
 }
 
 @media (max-width: 480px){
-    #questions { 
+    #questions {
         font-size: %220;
 /*        font-color: red;*/
     }
 
 @media (max-width: 480px){
-    #q_text { 
+    #q_text {
         font-size: %180;
 /*        font-color: red;*/
     }

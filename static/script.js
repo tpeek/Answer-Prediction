@@ -41,6 +41,7 @@ $(function(){
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
             $("#prediction").html("Prediction: "+response.prediction)
+            $('#score').html("Score: "+response.score)
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false)
             });
