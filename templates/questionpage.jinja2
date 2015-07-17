@@ -10,8 +10,9 @@
                 <p id="q_text">{{ question.text }}</p>
                 <form action="{{ request.route_url('question') }}"
                 method="POST" class="question_form">
-                <input id="qu" type="hidden" name="question_id" value={{ question.id }}>
-                <input id="score" type="hidden" name="score" value="{{score}}">
+                <input id="qu" type="hidden" name="question_id" value="{{ question.id }}">
+                <input id="score" type="hidden" name="score" value="{{ score }}">
+                <input id="predict" type="hidden" name="predict" value="{{ predict }}">
                     <ul id="choices">
                        <label>
                         <li>

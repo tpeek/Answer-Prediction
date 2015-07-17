@@ -210,6 +210,8 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
+    if request.method == "GET":
+        score = 0
     if request.authenticated_userid:
         user = User.get_by_username(request.authenticated_userid)
         if request.method == "POST":
@@ -217,6 +219,11 @@ def question(request):
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
+            score = int(request.params.get("score"))
+            predict = int(request.params.get("predict"))
+            if predict == answer:
+                score += 1
+            score += 1
             if answer not in [None, ''] and question.id not in [sub.question_id
                                                                 for sub in
                                                                 Submission.get_all_for_user(user)]:
@@ -227,8 +234,7 @@ def question(request):
                 )
         questions = Question.all()
         if questions:
-            score = request.params.get("score")
-            score = "dummy"
+
             submissions = Submission.get_all_for_user(user)
             l = []
             for q in questions:
@@ -246,7 +252,7 @@ def question(request):
                                                     "text": question.text,
                                                     "qid": question.id,
                                                     "prediction": prediction,
-                                                    "score": "dummy"
+                                                    "score": score
                                                     }), content_type=b'application/json')
                 return {"question": question, "prediction": prediction}
         return {"question": None, "prediction": None}

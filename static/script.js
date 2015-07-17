@@ -30,7 +30,7 @@
         $("#submit").attr('disabled', true);
         var question_id = $("#qu").val();
         var score = $("#score").val();
-        alert(score);
+        var predict = $("#predict").val();
 
         $.ajax({
             method : "POST",
@@ -38,12 +38,14 @@
             data : {"answer": answer,
                     "question_id": question_id,
                     "score": score,
+                    "predict": predict
                 }
         }).done(function(response){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
             $("#prediction").html("Prediction: "+response.prediction)
+            $("#predict").val(response.predict)
             $('#score').val(response.score)
             $("#score_display").html("Score: "+response.score)
             $("input:radio[name='answer']").each(function(){
