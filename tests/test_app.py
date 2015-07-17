@@ -495,12 +495,12 @@ def new_submissions(db_session, new_questions, new_users):
             kwargs = {
                 'question_id': question.id,
                 'user_id': user.id,
-                'answer': '4'
+                'answer': 4    # use int to allow unit testing w/ submissions list
             }
             submission = app.Submission(**kwargs)
             db_session.add(submission)
-            submissions.append(submission)
             db_session.flush()
+            submissions.append(submission)
     return submissions
 
 
@@ -509,16 +509,16 @@ def new_submissions(db_session, new_questions, new_users):
 @pytest.fixture(scope="function")
 def new_submissions_for_user1(db_session, new_questions, new_user):
     submissions = []
-    for question in new_questions:
+    for question in new_questions[:50]:
         kwargs = {
             'question_id': question.id,
             'user_id': new_user.id,
-            'answer': '4'
+            'answer': 4
         }
         submission = app.Submission(**kwargs)
         db_session.add(submission)
-        submissions.append(submission)
         db_session.flush()
+        submissions.append(submission)
     return submissions
 
 
@@ -528,26 +528,26 @@ def new_submissions_for_user1(db_session, new_questions, new_user):
 def big_data(
     new_questions,
     new_users,
-    new_submissions
+    new_submissions,
+    new_submissions_for_user1
 ):
     return {
         'new_questions': new_questions,
         'new_users': new_users,
         'new_submissions': new_submissions,
+        'new_submissions_for_user1': new_submissions_for_user1
     }
 
 
 # Test 22
 # submit answer of '4'
-def test_submit_big_data_not_enough_data(suite, big_data):
+def test_submit_big_data_not_enough_data(suite):
     test_login_success(suite)
     params = {
-        'question_id': suite['new_question'].id,  # question has one submission
+        'question_id': suite['new_question'].id,
         'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
-    with open('aaa.html', 'w') as fh:
-        fh.write(response.body)
     assert 'Prediction: Not enough data to predict this question.' in response.body
 
 
@@ -556,7 +556,12 @@ def test_submit_big_data_not_enough_data(suite, big_data):
 def test_submit_big_data_get_prediction(suite, big_data):
     test_login_success(suite)
     params = {
-        'question_id': big_data['new_questions'][57].id,  # has 100 submissions
+        'question_id': suite['new_question'].id,
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+    params = {
+        'question_id': suite['new_question2'].id,
         'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
@@ -569,3 +574,73 @@ def test_no_questions(suite):
 
 def test_user_answers_question_frist_time(suite):
     pass
+
+
+# - - - - - - - - - - - #
+# Algorithm Unit Tests  #
+# - - - - - - - - - - - #
+
+
+# Test 27
+# unit test for _get_data
+def test_get_data_unittest(suite, big_data):
+    users = [big_data['new_users'] + [suite['new_user']] for i in range(50)]   # expected
+    users.append(big_data['new_users'])    # expected
+    questions = big_data['new_questions'][:50]    # expected
+
+    arg1 = suite['new_user']
+    arg2 = big_data['new_questions'][57]
+
+    assert app._get_data(arg1, arg2) == (users, questions)
+
+
+# Test 28
+# unit test for _select_users
+def test_select_users_unittest(suite, big_data):
+    users = big_data['new_users']    # expected
+    questions = big_data['new_questions'][:50]   # expected
+
+    arg1 = [big_data['new_users'] + [suite['new_user']] for i in range(50)]
+    arg1.append(big_data['new_users'])
+    arg2 = big_data['new_questions'][:50]
+
+    actual = app._select_users(arg1, arg2)
+
+    assert actual[0].sort() == users.sort()
+    assert actual[1] == questions
+
+
+# Test 29
+# unit test for _parse_into_matrix
+def test_parse_into_matrix_unittest(suite, big_data):
+    x = [[4 for i in range(98)] for i in range(50)]   # expected
+
+    arg1 = big_data['new_questions'][:50]
+    arg2 = big_data['new_users']
+
+    assert app._parse_into_matrix(arg1, arg2) == x
+
+
+# Test 30
+# unit test for make_data
+def test_make_data_unittest(suite, big_data):
+    x = [[4 for i in range(98)] for i in range(50)]   # expected
+    y = [4 for i in range(98)]    # expected
+    u = [4 for i in range(50)]    # expected
+
+    arg1 = big_data['new_questions'][57]
+    arg2 = suite['new_user']
+
+    assert app.make_data(arg1, arg2) == (x, u, y)
+
+
+# Test 31
+# unit test for guess
+def test_guess_unittest(suite, big_data):
+    prediction = 4    # expected
+
+    arg1 = [[4 for i in range(98)] for i in range(50)]
+    arg2 = [4 for i in range(50)]
+    arg3 = [4 for i in range(98)]
+
+    assert int(round(app.guess(arg1, arg2, arg3))) == prediction
