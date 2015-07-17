@@ -91,6 +91,11 @@
     visibility: hidden;
   }
 
+  #about {
+    color: Navy;
+    margin: 20px;
+  }
+
   #welcome {
     margin-left: 10%;
     color: Navy;
