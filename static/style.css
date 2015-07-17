@@ -79,12 +79,13 @@
 }
 
 footer {
-   position:fixed;
-   bottom:0;
-   text-align: left;
-   font-size: .6em;
-   color: #666;
-   width: 100%;
+  position: relative;
+  bottom: 0;
+  text-align: left;
+  font-size: .6em;
+  color: #666;
+  width: 100%;
+  margin-top: 180px;
 }
 
 #home {
@@ -116,7 +117,6 @@ div#share-container p{
 }
 
 .rrssb-buttons{
-    position:fixed;
     bottom:2;
     left:2;
 }
