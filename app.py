@@ -268,6 +268,7 @@ def make_data(question, user):
     for user_ in users:
         y.append(Submission.get_answer(user_, question))
     u = [sub.answer for sub in Submission.get_all_for_user(user)]
+    u = [Submission.get_answer(user, q) for q in questions]
     return x, u, y
 
 
