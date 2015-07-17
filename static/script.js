@@ -29,19 +29,23 @@
         event.preventDefault();
         $("#submit").attr('disabled', true);
         var question_id = $("#qu").val();
+        var score = $("#score").val();
+        alert(score);
 
         $.ajax({
             method : "POST",
             url : "/question",
             data : {"answer": answer,
-                    "question_id": question_id
+                    "question_id": question_id,
+                    "score": score,
                 }
         }).done(function(response){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
             $("#prediction").html("Prediction: "+response.prediction)
-            $('#score').html("Score: "+response.score)
+            $('#score').val(response.score)
+            $("#score_display").html("Score: "+response.score)
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false);
             });

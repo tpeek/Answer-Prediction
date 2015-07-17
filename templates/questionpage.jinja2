@@ -11,6 +11,7 @@
                 <form action="{{ request.route_url('question') }}"
                 method="POST" class="question_form">
                 <input id="qu" type="hidden" name="question_id" value={{ question.id }}>
+                <input id="score" type="hidden" name="score" value="{{score}}">
                     <ul id="choices">
                        <label>
                         <li>
@@ -41,7 +42,7 @@
                     <input id="submit" type="submit" value="Submit" name="submit"/>
                 </form><br>
                 <button type="button" id="show_prediction">Predict</button>
-                <p id="score">Score: {{ score }}</p><br>
+                <p id="score_display">Score: {{ score }}</p><br>
                 <p id="prediction" class="hide">Prediction: {{ prediction }}</p><br>
                 {% endif %}
             </div>

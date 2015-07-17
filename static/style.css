@@ -105,3 +105,8 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 body {
   background-image: url("http://geekslovebacon.com/wp-content/uploads/2014/01/clean-white-polygon-backgrounds-8.jpg")
 }
+
+.rrssb-icon #shares {
+  float: top;
+  position: relative;
+}
