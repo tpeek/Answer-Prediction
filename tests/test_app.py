@@ -12,8 +12,8 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
-    # 'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
+    # 'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
+    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
@@ -177,7 +177,7 @@ def new_submission(db_session, new_question, new_user2):
     kwargs = {
         'question_id': new_question.id,
         'user_id': new_user2.id,
-        'answer': '3'
+        'answer': '4'
     }
     submission = app.Submission(**kwargs)
     db_session.add(submission)
@@ -192,7 +192,7 @@ def new_submission2(db_session, new_question2, new_user2):
     kwargs = {
         'question_id': new_question2.id,
         'user_id': new_user2.id,
-        'answer': '3'
+        'answer': '4'
     }
     submission = app.Submission(**kwargs)
     db_session.add(submission)
@@ -245,8 +245,8 @@ def suite(
     }
 
 
-LOGIN = '<li><a href="http://localhost/login">Login</a></li>'
-LOGOUT = '<li><a href="http://localhost/logout">Logout</a></li>'
+LOGIN = '<a href="http://localhost/login" id="loginlink" class="navlink">'
+LOGOUT = '<a href="http://localhost/logout" id="logoutlink">'
 
 
 # Test 5
@@ -416,7 +416,7 @@ def test_post_to_question_view_unauth(suite):
     params = {
         'question_id': '5',
         'user_id': '14',
-        'answer': '3'
+        'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='3*')
     assert response.status_code == 302  # redirect out
@@ -441,10 +441,126 @@ def test_submit_with_answer(suite):
     test_login_success(suite)
     params = {
         'question_id': suite['new_question'].id,
-        'answer': '2'
+        'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
     assert 'class="question_form"' in response.body
+
+
+# # # # # # #
+# BIG DATA  #
+# # # # # # #
+
+
+# Fixture 12
+# create more questions
+@pytest.fixture(scope="function")
+def new_questions(db_session):
+    questions = []
+    for i in range(3, 101):
+        kwargs = {
+            'text': str(i) + '?'
+        }
+        kwargs['session'] = db_session
+        question = app.Question.new(**kwargs)
+        questions.append(question)
+        db_session.flush()
+    return questions
+
+
+# Fixture 13
+# create more users
+@pytest.fixture(scope="function")
+def new_users(db_session):
+    users = []
+    for i in range(3, 101):
+        kwargs = {
+            'username': "Test_Username" + str(i),
+            'password': "testpassword" + str(i)
+        }
+        kwargs['session'] = db_session
+        user = app.User.new(**kwargs)
+        users.append(user)
+        db_session.flush()
+    return users
+
+
+# Fixture 14
+# create more submissions
+@pytest.fixture(scope="function")
+def new_submissions(db_session, new_questions, new_users):
+    submissions = []
+    for question in new_questions:
+        for user in new_users:
+            kwargs = {
+                'question_id': question.id,
+                'user_id': user.id,
+                'answer': '4'
+            }
+            submission = app.Submission(**kwargs)
+            db_session.add(submission)
+            submissions.append(submission)
+            db_session.flush()
+    return submissions
+
+
+# Fixture 15
+# create submissions for first user
+@pytest.fixture(scope="function")
+def new_submissions_for_user1(db_session, new_questions, new_user):
+    submissions = []
+    for question in new_questions:
+        kwargs = {
+            'question_id': question.id,
+            'user_id': new_user.id,
+            'answer': '4'
+        }
+        submission = app.Submission(**kwargs)
+        db_session.add(submission)
+        submissions.append(submission)
+        db_session.flush()
+    return submissions
+
+
+# Fixture 15
+# fixture to create big data suite
+@pytest.fixture(scope="function")
+def big_data(
+    new_questions,
+    new_users,
+    new_submissions
+):
+    return {
+        'new_questions': new_questions,
+        'new_users': new_users,
+        'new_submissions': new_submissions,
+    }
+
+
+# Test 22
+# submit answer of '4'
+def test_submit_big_data_not_enough_data(suite, big_data):
+    test_login_success(suite)
+    params = {
+        'question_id': suite['new_question'].id,  # question has one submission
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+    with open('aaa.html', 'w') as fh:
+        fh.write(response.body)
+    assert 'Prediction: Not enough data to predict this question.' in response.body
+
+
+# Test 23
+# submit answer of '4'
+def test_submit_big_data_get_prediction(suite, big_data):
+    test_login_success(suite)
+    params = {
+        'question_id': big_data['new_questions'][57].id,  # has 100 submissions
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+    assert 'Prediction: 4' in response.body
 
 #test 25
 def test_no_questions(suite):

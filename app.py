@@ -59,6 +59,10 @@ class User(Base):
         return instance
 
     @classmethod
+    def all(cls, session=DBSession):
+        return session.query(cls).all()
+
+    @classmethod
     def get_by_id(cls, id, session=DBSession):
         return session.query(cls).filter(cls.id == id).one()
 
