@@ -455,7 +455,7 @@ def test_get_about_page(suite):
 
 
 # Test 23
-#
+# getting question page for the first time
 def test_user_answers_question_frist_time(suite):
     test_login_success(suite)
     response = suite['testapp'].get('/question', status='2*')
@@ -476,7 +476,7 @@ def test_submit_not_enough_data(suite):
 
 
 # Test 25
-#
+# answer all the questions
 def test_no_more_questions(suite):
     test_login_success(suite)
 
@@ -618,7 +618,14 @@ def test_get_data_unittest(suite, big_data):
     arg1 = suite['new_user']
     arg2 = big_data['new_questions'][57]
 
-    assert app._get_data(arg1, arg2) == (users, questions)
+    actual = app._get_data(arg1, arg2)
+
+    assert len(actual[0]) == len(users)
+
+    for i, item in enumerate(actual[0]):
+        assert item.sort() == users[i].sort()
+
+    assert actual[1] == questions
 
 
 # Test 28
