@@ -447,6 +447,53 @@ def test_submit_with_answer(suite):
     assert 'class="question_form"' in response.body
 
 
+# Test 22
+# get 'about' page
+def test_get_about_page(suite):
+    response = suite['testapp'].get('/about', status='2*')
+    assert '<main id="faq">' in response.body
+
+
+# Test 23
+# getting question page for the first time
+def test_user_answers_question_frist_time(suite):
+    test_login_success(suite)
+    response = suite['testapp'].get('/question', status='2*')
+
+    assert 'Prediction: Not enough data to predict this question.' in response.body
+
+
+# Test 24
+# submit answer of '4'
+def test_submit_not_enough_data(suite):
+    test_login_success(suite)
+    params = {
+        'question_id': suite['new_question'].id,
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+    assert 'Prediction: Not enough data to predict this question.' in response.body
+
+
+# Test 25
+# answer all the questions
+def test_no_more_questions(suite):
+    test_login_success(suite)
+
+    params = {
+        'question_id': suite['new_question'].id,
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+    params = {
+        'question_id': suite['new_question2'].id,
+        'answer': '4'
+    }
+    response = suite['testapp'].post('/question', params=params, status='2*')
+
+    assert 'There are no questions' in response.body
+
+
 # # # # # # #
 # BIG DATA  #
 # # # # # # #
@@ -539,24 +586,12 @@ def big_data(
     }
 
 
-# Test 22
-# submit answer of '4'
-def test_submit_big_data_not_enough_data(suite):
-    test_login_success(suite)
-    params = {
-        'question_id': suite['new_question'].id,
-        'answer': '4'
-    }
-    response = suite['testapp'].post('/question', params=params, status='2*')
-    assert 'Prediction: Not enough data to predict this question.' in response.body
-
-
-# Test 23
+# Test 26
 # submit answer of '4'
 def test_submit_big_data_get_prediction(suite, big_data):
     test_login_success(suite)
     params = {
-        'question_id': suite['new_question'].id,
+        'question_id': suite['new_question'].id,   # answer first 2 questions
         'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
@@ -565,38 +600,7 @@ def test_submit_big_data_get_prediction(suite, big_data):
         'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
-    assert 'Prediction: 4' in response.body
-
-
-# Test 24
-#
-def test_no_questions(suite):
-    test_login_success(suite)
-    params = {
-        'question_id': big_data['new_questions'][65].id,  # out of questions
-        'answer': '4'
-    }
-    assert 'There are no questions'
-
-
-# Test 25
-#
-def test_user_answers_question_frist_time(suite, big_data):
-    test_login_success(suite)
-    params = {
-        'question_id': suite['new_question'].id,  # question has one submission
-        'answer': '1'
-    }
-    response = suite['testapp'].post('/question', params=params, status='200 OK')
-    with open('aaa.html', 'w') as fh:
-        fh.write(response.body)
-    assert 'Prediction: Not enough data to predict this question. Keep going!' in response.body
-
-
-# Test 26
-#
-def test_user_answers_question_frist_time(suite):
-    pass
+    assert 'Prediction: 4' in response.body  # next question will be from new data
 
 
 # - - - - - - - - - - - #
@@ -614,7 +618,14 @@ def test_get_data_unittest(suite, big_data):
     arg1 = suite['new_user']
     arg2 = big_data['new_questions'][57]
 
-    assert app._get_data(arg1, arg2) == (users, questions)
+    actual = app._get_data(arg1, arg2)
+
+    assert len(actual[0]) == len(users)
+
+    for i, item in enumerate(actual[0]):
+        assert item.sort() == users[i].sort()
+
+    assert actual[1] == questions
 
 
 # Test 28
@@ -667,10 +678,3 @@ def test_guess_unittest(suite, big_data):
     arg3 = [4 for i in range(98)]
 
     assert int(round(app.guess(arg1, arg2, arg3))) == prediction
-
-
-# Test 32
-# not going to work
-def test_mobile(window_size):
-    test_window_size = '400px'
-    assert 'footer_display' == None
