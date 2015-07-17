@@ -46,10 +46,10 @@
     background: teal;
   }
 
-#choices input {
+/*#choices input {
   display: none;
 }
-
+*/
 #questions {
   margin: auto;
   width: 85%;
@@ -88,9 +88,6 @@ footer {
   margin-top: 180px;
 }
 
-input[type="radio"]:checked + span {
-    background-color: white;
-  }
 
 #home {
   margin-left: 10%;
