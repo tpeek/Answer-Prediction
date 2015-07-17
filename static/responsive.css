@@ -46,7 +46,7 @@
     cursor:pointer;
   }
 
-  #choices input {
+  radio-button {
     display: none;
   }
 

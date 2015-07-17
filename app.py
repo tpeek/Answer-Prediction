@@ -210,13 +210,31 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
+    if request.method == "GET":
+        score = 0
+        count = 0
     if request.authenticated_userid:
         user = User.get_by_username(request.authenticated_userid)
         if request.method == "POST":
+            score = int(request.params.get("score", 0))
+            print score
+            score += 1
             answer = request.params.get("answer")
+            print answer
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
+            score = int(request.params.get("score", 0))
+            predict = request.params.get("predict", None)
+
+            try:
+                count = int(request.params.get("count", 0))
+                if int(predict) == int(answer):
+                    score += 1
+                    count += 1
+            except:
+                pass
+
             if answer not in [None, ''] and question.id not in [sub.question_id
                                                                 for sub in
                                                                 Submission.get_all_for_user(user)]:
@@ -227,8 +245,6 @@ def question(request):
                 )
         questions = Question.all()
         if questions:
-            score = request.params.get("score")
-            score = "dummy"
             submissions = Submission.get_all_for_user(user)
             l = []
             for q in questions:
@@ -246,9 +262,10 @@ def question(request):
                                                     "text": question.text,
                                                     "qid": question.id,
                                                     "prediction": prediction,
-                                                    "score": "dummy"
+                                                    "score": score,
+                                                    "count": count
                                                     }), content_type=b'application/json')
-                return {"question": question, "prediction": prediction}
+                return {"question": question, "prediction": prediction, "score": score, "count": count}
         return {"question": None, "prediction": None}
     else:
         return HTTPFound(request.route_url('home'))
@@ -337,6 +354,42 @@ def guess(every_answer, user_answers, cur_question):
     elif total < 1:
         total = 1
     return total
+
+
+def test5():
+    num_q = 1000
+    num_u =100000
+    matrix = [[None for x in range(num_q)] for x in range(num_u)]
+    subs = Submission.all()
+    for sub in subs:
+        matrix[sub.question_id][sub.user_id] = sub.answer
+
+    # print matrix
+    total = 0
+
+    matrix[5]
+    y = filter(lambda a: a is not None, matrix[5])
+
+    not_answered = 0
+    good = []
+    really_good = []
+    for x in range(num_u):
+        for y in range(num_q):
+            if matrix[x][y] is None:
+                not_answered += 1
+                if not_answered >= 100:
+                    break
+        good.append(matrix[x])
+    for user in good:
+        really_good.append(user)
+        for ans in user:
+            if ans is None:
+                really_good.pop()
+                break
+
+    print "done"
+    print really_good
+
 
 
 # -App-

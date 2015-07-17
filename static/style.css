@@ -46,10 +46,10 @@
     background: teal;
   }
 
-#choices input {
+/*#choices input {
   display: none;
 }
-
+*/
 #questions {
   margin: auto;
   width: 85%;
@@ -87,6 +87,7 @@ footer {
   width: 100%;
   margin-top: 180px;
 }
+
 
 #home {
   margin-left: 10%;
@@ -127,4 +128,9 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 
 body {
   background-image: url("http://geekslovebacon.com/wp-content/uploads/2014/01/clean-white-polygon-backgrounds-8.jpg")
+}
+
+.rrssb-icon #shares {
+  float: top;
+  position: relative;
 }
