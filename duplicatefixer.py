@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import os
-from app import Submission
+from app import User, Submission
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
@@ -19,19 +19,22 @@ if __name__ == '__main__':
     sess = session()
 
     duplicates = []
-    submissions = Submission.all(sess)
+    users = User.all(sess)
 
-    while submissions:
-        currentsub = submissions[0]
-        for sub in submissions[1:]:
-            print "|================|"
-            print sub.id, sub.user_id, sub.question_id
-            print currentsub.id, currentsub.user_id, currentsub.question_id
-            if (sub.question_id, sub.user_id) == (currentsub.question_id, currentsub.user_id):
-                duplicates.append(sub)
-                submissions.remove(sub)
-                raw_input("\n***Found***\n")
-        submissions.remove(currentsub)
+    while users:
+        user = users.pop()
+        submissions = Submission.get_all_for_user(user, sess)
+        while submissions:
+            currentsub = submissions[0]
+            for sub in submissions[1:]:
+                print "|================|"
+                print sub.id, sub.user_id, sub.question_id
+                print currentsub.id, currentsub.user_id, currentsub.question_id
+                if (sub.question_id, sub.user_id) == (currentsub.question_id, currentsub.user_id):
+                    duplicates.append(sub)
+                    submissions.remove(sub)
+                    raw_input("\n***Found***\n")
+            submissions.remove(currentsub)
     raw_input(str(len(duplicates)) + " duplicates found")
     if duplicates:
         for sub in duplicates:
