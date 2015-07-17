@@ -31,6 +31,7 @@
         var question_id = $("#qu").val();
         var score = $("#score").val();
         var predict = $("#predict").val();
+        var count = $("#count").val();
 
         $.ajax({
             method : "POST",
@@ -38,16 +39,18 @@
             data : {"answer": answer,
                     "question_id": question_id,
                     "score": score,
-                    "predict": predict
+                    "predict": predict,
+                    "count": count
                 }
         }).done(function(response){
             answer = null;
             $("#q_text").html(response.text)
             $("#qu").val(response.qid)
             $("#prediction").html("Prediction: "+response.prediction)
-            $("#predict").val(response.predict)
+            $("#predict").val(response.prediction)
             $('#score').val(response.score)
-            $("#score_display").html("Score: "+response.score)
+            $('#count').val(response.count)
+            $("#score_display").html("Score: "+response.score+"/"+response.count)
             $("input:radio[name='answer']").each(function(){
                 $(this).prop('checked', false);
             });

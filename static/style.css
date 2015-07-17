@@ -87,6 +87,10 @@ footer {
    width: 100%;
 }
 
+input[type="radio"]:checked + span {
+    background-color: white;
+  }
+
 #home {
   margin-left: 10%;
   color: Navy;
