@@ -12,8 +12,8 @@ import sys
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    # 'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
-    'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
+    'postgresql://jameshemmaplardh:123:@localhost:5432/test-project1'
+    # 'postgresql://jesse:Jjk5646!@localhost:5432/test-project1'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 
@@ -560,6 +560,12 @@ def test_submit_big_data_get_prediction(suite, big_data):
         'answer': '4'
     }
     response = suite['testapp'].post('/question', params=params, status='2*')
-    with open('aaa.html', 'w') as fh:
-        fh.write(response.body)
     assert 'Prediction: 4' in response.body
+
+#test 25
+def test_no_questions(suite):
+    assert 1 == 1
+    pass
+
+def test_user_answers_question_frist_time(suite):
+    pass
