@@ -6,12 +6,7 @@ from app import Question
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://wesleywooten@localhost:5432/AP_test'
-    #'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
-    #'postgresql://power_user:nopassword@localhost:5432/test1'
-)
+DATABASE_URL = os.environ.get('DATABASE_URL',)
 HELP = """
      new / n:    create new question
 

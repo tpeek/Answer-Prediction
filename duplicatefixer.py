@@ -5,12 +5,7 @@ from app import User, Submission
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    #'postgresql://wesleywooten@localhost:5432/AP_test'
-    'postgresql://power_user:hownowbrownsnake@localhost:5432/test1'
-    #'postgresql://power_user:nopassword@localhost:5432/test1'
-)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if __name__ == '__main__':
     engine = sa.create_engine(DATABASE_URL)
@@ -30,7 +25,8 @@ if __name__ == '__main__':
                 print "|================|"
                 print sub.id, sub.user_id, sub.question_id
                 print currentsub.id, currentsub.user_id, currentsub.question_id
-                if (sub.question_id, sub.user_id) == (currentsub.question_id, currentsub.user_id):
+                if (sub.question_id, sub.user_id) == (currentsub.question_id,
+                                                      currentsub.user_id):
                     duplicates.append(sub)
                     submissions.remove(sub)
                     raw_input("\n***Found***\n")

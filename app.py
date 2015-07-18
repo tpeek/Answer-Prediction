@@ -290,16 +290,15 @@ def _get_data(user, question):
     questions plus the question that the user is currently answering"""
     users = []
     questions = [Question.get_question_by_id(sub.question_id)
-                 for sub in Submission.get_all_for_user(user)
-                 ]
+                 for sub in Submission.get_all_for_user(user)]
 
     for q in questions:
         users.append([User.get_by_id(sub.user_id)
-                      for sub in Submission.get_all_for_question(q)
-                      ])
+                      for sub in Submission.get_all_for_question(q)])
+
     users.append([User.get_by_id(sub.user_id)
-                  for sub in Submission.get_all_for_question(question)
-                  ])
+                  for sub in Submission.get_all_for_question(question)])
+
     return users, questions
 
 
@@ -331,42 +330,6 @@ def guess(every_answer, user_answers, cur_question):
     elif total < 1:
         total = 1
     return total
-
-
-def test5():
-    num_q = 1000
-    num_u =100000
-    matrix = [[None for x in range(num_q)] for x in range(num_u)]
-    subs = Submission.all()
-    for sub in subs:
-        matrix[sub.question_id][sub.user_id] = sub.answer
-
-    # print matrix
-    total = 0
-
-    matrix[5]
-    y = filter(lambda a: a is not None, matrix[5])
-
-    not_answered = 0
-    good = []
-    really_good = []
-    for x in range(num_u):
-        for y in range(num_q):
-            if matrix[x][y] is None:
-                not_answered += 1
-                if not_answered >= 100:
-                    break
-        good.append(matrix[x])
-    for user in good:
-        really_good.append(user)
-        for ans in user:
-            if ans is None:
-                really_good.pop()
-                break
-
-    print "done"
-    print really_good
-
 
 
 # -App-
