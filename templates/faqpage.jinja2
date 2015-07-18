@@ -1,33 +1,40 @@
 {% extends "base.jinja2" %}
 {% block section %}
-    <main id="faq">
-      <body>
-	    <table class="devs">
-	    <thead>
-	    <h1 class="devs">Developers</h1>
-	    <th colspan="2">
-	   </th>
-	   </thead>
-	    <tbody>
-	    <tr id='devs'>
-	        <td>
-	        	<a href="https://github.com/HeyIamJames">
-		        <img src ="https://media.licdn.com/mpr/mpr/shrink_200_200/p/4/000/169/0c7/2bfc664.jpg">
-		        </a><br>James Hemmaplardh</td>
-		        <td>  <a href="https://github.com/tpeek">
-		        <img src ="https://avatars3.githubusercontent.com/u/7531241?v=3&s=460">
-		        </a><br>Tyler Peek</td>
-		        <td><a href="https://github.com/doctormcbob">
-		        <img src ="http://i.snag.gy/G27YX.jpg">
-		        </a><br>Wesley Wooten</td>
-		        <td>  <a href="https://github.com/jesseklein406">
-		        <img src ="https://avatars3.githubusercontent.com/u/8745605?v=3&s=460" />
-		        </a><br>Jesse Klein
-	        </td>
-	   </tr>
-	    </tbody>
-	    </table>
-<p id="about">Sherlock Engine is a python based application which will use various algorithms to derive correlations that predict what answers the user will choose based on a user's previous answers and the data gathered from other users. As a user answers more questions and the database learns more information about how other users answer and the preditions will become more accurate.</p>
+<main id="faq">
+	<body>
+		<table class="devs">
+			<thead>
+				<h1 id="Developers" class="devs">Developers</h1>
+				<th colspan="2">
+				</th>
+			</thead>
+			<tbody>
+				<tr id='devs'>
+					<td>
+						<a href="https://github.com/HeyIamJames">
+							<img src ="https://media.licdn.com/mpr/mpr/shrink_200_200/p/4/000/169/0c7/2bfc664.jpg">
+						</a><br>James<br>Hemmaplardh</td>
+						<td>  <a href="https://github.com/tpeek">
+							<img src ="https://avatars3.githubusercontent.com/u/7531241?v=3&s=460">
+						</a><br>Tyler<br>Peek</td>
+						<td><a href="https://github.com/doctormcbob">
+							<img src ="http://i.snag.gy/G27YX.jpg">
+						</a><br>Wesley<br>Wooten</td>
+						<td>  <a href="https://github.com/jesseklein406">
+							<img src ="https://avatars3.githubusercontent.com/u/8745605?v=3&s=460" />
+						</a><br>Jesse<br>Klein
+					</td>
+				</tr>
+			</tbody>
+		</table><br><br>
+		<p id="about">Four Days, Four Guys, Multiple Linear Regression<br><br>
+		Sherlock Engine is a python based application which uses multiple linear regression
+		to predict what the user's answer will be to the next question. Each time a user
+		answers, the prediction becomes more accurate for that user as well as for all other
+		users. It is based off the idea that everything is correlated, even if only by a
+		small amount. If you have enough information about many individuals in a population,
+		you can make accurate predictions about any single individual in that population.</p>
+		<br><br>
 	</body>
-    </main>
+</main>
 {% endblock %}

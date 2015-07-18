@@ -1,22 +1,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 
 
-
-/*<meta name="viewport" content="width=device-width, initial-scale=1" />
-*/
-
-
 @media (max-width: 480px) {
-  body{
-    /*    background-image: none;*/
-    /*    background-color: white;*/
-  }
+
 }
 
+
 @media (max-width: 480px) {
+
   a {
     font-size: 70%;
     text-align: center;
+  }
+
+  img {
+    width: 73px;
+    height: 73px;
+  }
+
+  .devs {
+    font-size: 12px;
+    text-align: center;
+    padding: 0px;
+    margin-left: -55px;
+  }
+
+  #Developers {
+    font-size: 20px;
+  }
+
+  #chatbox, #footer{
+    display: none;
+    visibility: hidden;
+  }
+
+  #welcome, #about {
+    margin-left: 10%;
+    color: Navy;
+    width: 140%;
+    padding: 0px;
+    margin: -30px;
   }
 
   #logo{
@@ -38,7 +61,7 @@
   #choices li {
     float: right;
     color: white;
-    margin: 2px;
+    margin: 5px;
     width: 290px;
     height: 50px;
     background: #101050;
@@ -46,13 +69,14 @@
     cursor:pointer;
   }
 
-  radio-button {
+  #choices input {
     display: none;
   }
 
+  /*This is a test feature, to be implemented soon.*/
   #score_display {
   display: none;
-}
+  }
 
   #choices li:hover {
     background: navy;
@@ -65,47 +89,4 @@
     right:0;
     float: right;
   }
-}
-
-
-
-
-@media (max-width: 480px){
-  img {
-    width:50px;
-    height:50px;
-  }
-  .devs {
-    text-align: center;
-    padding: 20px;
-    width: 90%;
-    margin: auto;
-  }
-}
-
-
-@media (max-width: 480px){
-  #footer {
-    display : none;
-    visibility : hidden;
-  }
-
-  #chatbox{
-    display: none;
-    visibility: hidden;
-  }
-
-  #about {
-    color: Navy;
-    margin: 20px;
-  }
-
-  #welcome {
-    margin-left: 10%;
-    color: Navy;
-    width: 140%;
-    padding: 0px;
-    margin: -30px;
-  }
-}
 }

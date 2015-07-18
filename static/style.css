@@ -29,31 +29,27 @@
 
 
 #choices li {
-    display: inline-block;
-    vertical-align:top;
-    color: white;
-    margin: 2px;
-    width: 90px;
-    height: 80px;
-    background: #101050;
-    border-radius:8px;
-    cursor:pointer;
-    margin: auto;
-    border: 3px solid teal;
+  display: inline-block;
+  vertical-align:top;
+  color: white;
+  margin: 2px;
+  width: 90px;
+  height: 80px;
+  background: #101050;
+  border-radius:8px;
+  cursor:pointer;
+  margin: auto;
+  border: 3px solid teal;
 }
 
 #score_display {
   display: none;
 }
 
-  #choices li:hover {
-    background: teal;
-  }
-
-/*#choices input {
-  display: none;
+#choices li:hover {
+  background: teal;
 }
-*/
+
 #questions {
   margin: auto;
   width: 85%;
@@ -63,7 +59,7 @@
 }
 
 #q_text {
-  font-size: 220%;
+  font-size: 150%;
   font-style: bold;
   color: navy;
 }
@@ -72,7 +68,7 @@
   text-align: center;
   color: Navy;
   padding: 20px;
-  width: 99%;
+  width: 120%;
   margin: auto;
 }
 
@@ -92,8 +88,7 @@ footer {
   margin-top: 180px;
 }
 
-
-#home {
+#home, #faq {
   margin-left: 10%;
   color: Navy;
   width: 60%;

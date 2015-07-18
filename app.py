@@ -30,8 +30,7 @@ import json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 Base = declarative_base()
 
 
@@ -136,11 +135,9 @@ def login_page(request):
             authenticated = login(request)
         except ValueError as e:
             return {'error': e}
-
         if authenticated:
             headers = remember(request, username)
             return HTTPFound(request.route_url('home'), headers=headers)
-
         else:
             return {'error': 'Not authenticated'}
     else:
@@ -210,35 +207,16 @@ def do_logout(request):
 
 @view_config(route_name="question", renderer='templates/questionpage.jinja2')
 def question(request):
-    if request.method == "GET":
-        score = 0
-        count = 0
     if request.authenticated_userid:
         user = User.get_by_username(request.authenticated_userid)
         if request.method == "POST":
-            score = int(request.params.get("score", 0))
-            print score
-            score += 1
             answer = request.params.get("answer")
-            print answer
             question = Question.get_question_by_id(
                 request.params.get("question_id")
             )
-            score = int(request.params.get("score", 0))
-            predict = request.params.get("predict", None)
+            if (answer not in [None, ''] and question.id not in
+               [sub.question_id for sub in Submission.get_all_for_user(user)]):
 
-            try:
-                count = int(request.params.get("count", 0))
-                count += 1
-                if int(predict) == int(answer):
-                    score += 1
-
-            except:
-                pass
-
-            if answer not in [None, ''] and question.id not in [sub.question_id
-                                                                for sub in
-                                                                Submission.get_all_for_user(user)]:
                 Submission.new(
                     user=user,
                     question=question,
@@ -259,14 +237,12 @@ def question(request):
                 else:
                     prediction = "Not enough data to predict this question. Keep going!"
                 if 'HTTP_X_REQUESTED_WITH' in request.environ and request.method == "POST":
-                    return Response(body=json.dumps({
-                                                    "text": question.text,
-                                                    "qid": question.id,
-                                                    "prediction": prediction,
-                                                    "score": score,
-                                                    "count": count
-                                                    }), content_type=b'application/json')
-                return {"question": question, "prediction": prediction, "score": score, "count": count}
+                    return Response(
+                        body=json.dumps({"text": question.text,
+                                         "qid": question.id,
+                                         "prediction": prediction,
+                                         }), content_type=b'application/json')
+                return {"question": question, "prediction": prediction}
         return {"question": None, "prediction": None}
     else:
         return HTTPFound(request.route_url('home'))
