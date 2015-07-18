@@ -3,4 +3,4 @@ Authors: Tyler Peek, Wesley Wooten, James Hemmaplardh, Jesse Klein
 
 
 Summary:
-A Code Fellows group project. A website will be made where a user can log in and answer fun, interesting and random questions. Using the user's previous answers and the data gathered from other users, the website will use correlations to predict what answers the user will pick. As the user answers more questions and the database gets more information about how other users answer, the preditions will become more accurate.
+A Code Fellows group project. Sherlock Engine is a python based application which uses multiple linear regression to predict what the user's answer will be to the next question. Each time a user answers, the prediction becomes more accurate for that user as well as for all other users. It is based off the idea that everything is correlated, even if only by a small amount. If you have enough information about many individuals in a population, you can make accurate predictions about any single individual in that population.
