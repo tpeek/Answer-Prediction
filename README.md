@@ -17,10 +17,13 @@ A Code Fellows group project. Sherlock Engine is a python based application whic
  
 ## Main Responsibilities:
  * Tyler Peek:
-   * AWS, Statistical Model
+   * AWS
+   * Statistical Model
  * Wesley Wooten:
-   * Data Storage and Retrieval, AJAX
+   * Data Storage and Retrieval
+   * AJAX
  * James Hemmaplardh:
-   * Frontend, User Authentication, Testing
+   * Frontend
+   * User Authentication
  * Jesse Klein:
    * Testing
