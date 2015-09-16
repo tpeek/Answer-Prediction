@@ -1,5 +1,5 @@
 # Answer-Prediction
--- A website that can read your mind.
+*A website that can read your mind.*
 
 Authors: Tyler Peek, Wesley Wooten, James Hemmaplardh, Jesse Klein
 
