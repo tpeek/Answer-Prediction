@@ -1,4 +1,6 @@
 # Answer-Prediction
+A website that can read your mind.
+
 Authors: Tyler Peek, Wesley Wooten, James Hemmaplardh, Jesse Klein
 
 
@@ -12,8 +14,8 @@ A Code Fellows group project, completed in one week by four students. Sherlock E
  * AWS
  * PostgreSQL
  * JavaScript
- *  AJAX
- *  git/GitHub
+ * AJAX
+ * git/GitHub
  
 ### Main Responsibilities:
  * Tyler Peek:
